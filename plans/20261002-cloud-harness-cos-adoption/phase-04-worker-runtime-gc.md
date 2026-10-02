@@ -1,6 +1,6 @@
 # Phase 04 — Sleeping-worker runtime resource GC
 
-**Status:** DRAFT PR #919 — CHECKS RUNNING  
+**Status:** READY FOR REVIEW — CHECKS GREEN  
 **Lineage:** #215, #482  
 **PR:** #919  
 **Cloud Harness concept:** durable identity lifetime != revocable runtime lifetime
@@ -32,10 +32,10 @@
 - [x] Typecheck passed locally.
 - [x] Production build passed locally.
 - [x] PR checklist passed.
-- [ ] CI running.
-- [ ] CodeQL running.
-- [ ] Final exact-head review after CI settles.
-- [ ] Mark Ready only when all exact-head checks are green.
+- [x] CI passed.
+- [x] CodeQL passed.
+- [x] Final exact-head review completed.
+- [x] Marked Ready for review.
 
 ## Invariants
 
