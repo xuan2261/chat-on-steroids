@@ -44,18 +44,25 @@ Cloud Harness is a remote/local execution harness with structured workspace/sess
 | Order | Candidate PR | Lineage | Dependency | Status |
 |---|---|---|---|---|
 | 00 | Cross-turn retained exec reassociation | #892 / PR #899 | none | MERGED — ships in 2.1.26 |
-| 01 | Send-time Core capability/preflight projection | #906 / PR #907; lineage #208, #482 | none | READY FOR REVIEW — CHECKS GREEN |
+| 01 | Send-time Core capability/preflight projection | #906 / PR #907; lineage #208, #482 | none | MERGED — ships in 2.1.26 |
 | 02 | Retained exec operation-state projection | #36, #892, #208 | PR 00 | DEFERRED — no concrete gap after current-main scout |
-| 03 | Worker-overview health projection | #908 / PR #909; lineage #210, #482, #221 | independent | READY FOR REVIEW — CHECKS GREEN |
-| 04 | Sleeping-worker runtime resource GC | #215, #482 / PR #919 | PR 00 | READY FOR REVIEW — CHECKS GREEN |
+| 03 | Worker-overview health projection | #908 / PR #909; lineage #210, #482, #221 | independent | MERGED — ships in 2.1.26 |
+| 04 | Sleeping-worker runtime resource GC | #215, #482 / PR #919 | PR 00 | REVIEW FIX COMPLETE — WAITING #926 MERGE + LATEST-MAIN SYNC |
 | 05 | Remote MCP plugin network/credential hardening | #208, #360 | security-sensitive follow-up stays private | AUDIT COMPLETE — PRIVATE CHANNEL FOR ANY FINDINGS |
-| 06 | Installed GitHub Skill provenance projection | #917 / PR #918; lineage #514, #208 | independent | READY FOR REVIEW — CHECKS GREEN |
+| 06 | Installed GitHub Skill provenance projection | #917 / PR #918; lineage #514, #208 | independent | MERGED — ships in 2.1.26 |
 | 07 | Artifact/checkpoint lifecycle, starting narrow | #889, #208 | maintainer has announced implementation plan | HOLD — AVOID DUPLICATE PR |
 | 08 | Optional Cloud Harness remote-executor adapter | #208, #482; docs sync #920 / PR #921 | only after 01–07 evidence | DEFERRED — current Plugins surface already supports large catalogs |
 
 ## Current Plugins compatibility finding
 
-Current CoS implementation publishes catalogs larger than 64 tools when they fit the schema-byte budget. The live limits are 250 KB of complete schemas plus a separate 256-tool emergency ceiling. The old 64-tool statement was stale documentation, not a runtime limit. Issue #920 / draft PR #921 updates the docs. This materially reduces the need for a Cloud Harness-specific curation adapter solely because of tool count.
+Current CoS implementation publishes catalogs larger than 64 tools when they fit the schema-byte budget. The live limits are 250 KB of complete schemas plus a separate 256-tool emergency ceiling. The old 64-tool statement was stale documentation, not a runtime limit. Issue #920 / PR #921 updated the docs and is merged. This materially reduces the need for a Cloud Harness-specific curation adapter solely because of tool count.
+
+## Parallel maintenance / localization PRs
+
+These are not new Cloud Harness parity phases, but they affect current-main verification while the roadmap PRs are in flight.
+
+- #925 / PR #926 — Russian worker-health localization baseline fix. Exact-head checks green; Ready for review. This restores renderer i18n completeness on current main.
+- #931 / PR #932 — Vietnamese (`vi`) first-class renderer + Chrome companion localization. Draft; fail-first and wiring commits are open while catalogs are translated/reviewed.
 
 ## Global TODO
 
