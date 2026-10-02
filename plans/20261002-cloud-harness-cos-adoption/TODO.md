@@ -33,7 +33,9 @@ Canonical plan: `plans/20261002-cloud-harness-cos-adoption/plan.md`
 - [x] Opened #917 + draft PR #918 to show installed `ref @ short-commit` without changing provenance authority.
 - [ ] PR #918: CI + CodeQL + fail-first + PR checklist green; screenshots attached; Ready for review.
 - [ ] #889 artifact export: hold public implementation because maintainer has announced their own plan; monitor and contribute only if requested.
-- [ ] Re-evaluate Cloud Harness remote-executor adapter last.
+- [x] Verified current Plugins exposure supports >64 tools when schema bytes fit; opened docs correction #920 / PR #921 for the stale 64-tool statement.
+- [ ] PR #921: checklist green; CI + CodeQL running.
+- [ ] Re-evaluate Cloud Harness remote-executor adapter last using actual schema-byte footprint, not the obsolete 64-tool assumption.
 
 ## Stop rules
 
