@@ -1,5 +1,7 @@
 # TODO — Cloud Harness → CoS focused PR sequence
 
+Hourly condition-watch monitors #907/#909/#918/#919/#921 and only notifies on meaningful CI/review/merge state changes.
+
 Canonical plan: `plans/20261002-cloud-harness-cos-adoption/plan.md`
 
 ## Now
@@ -27,7 +29,7 @@ Canonical plan: `plans/20261002-cloud-harness-cos-adoption/plan.md`
 - [x] Scout retained exec operation-state projection; defer PR because current main already has owner-scoped running/exited-unread/replay semantics and no concrete missing workflow was proven.
 - [x] Opened focused worker-overview health issue #908 + draft PR #909 after incorporating #221 maintainer feedback.\n- [ ] PR #909: synced head `be31881a…`; fresh CodeQL/CI/checklist reruns in progress. Real before/after screenshots remain mandatory before Ready.
 - [x] Opened Phase 04 draft PR #919 from current-main design lineage in #215.
-- [ ] PR #919: checklist green; wait for CI + CodeQL, then final-review and mark Ready.
+- [x] PR #919: CI + CodeQL + PR checklist green; final-reviewed and Ready for review.
 - [x] Remote plugin/OAuth network audit completed; any security-sensitive follow-up stays in the repository's private reporting channel.
 - [x] Skill provenance inventory completed; CoS already owns exact GitHub origin/commit/revision/hash metadata.
 - [x] Opened #917 + draft PR #918 to show installed `ref @ short-commit` without changing provenance authority.
