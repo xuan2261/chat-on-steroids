@@ -1,6 +1,6 @@
 # Phase 04 — Sleeping-worker runtime resource GC
 
-**Status:** READY FOR REVIEW — CHECKS GREEN  
+**Status:** REVIEW FIX COMPLETE — WAITING #926 MERGE + LATEST-MAIN SYNC  
 **Lineage:** #215, #482  
 **PR:** #919  
 **Cloud Harness concept:** durable identity lifetime != revocable runtime lifetime
@@ -40,3 +40,20 @@
 ## Invariants
 
 Broker owns worker lifecycle; session store owns durable attachment; exec ownership owns custody; unified exec manager owns process lifetime. GC coordinates them and stores no second authority.
+
+
+## Maintainer review follow-up
+
+Maintainer accepted the ownership/race design but required safer product behavior before merge.
+
+Implemented on the PR branch:
+- cleanup is explicit opt-in and defaults off for fresh + legacy configs;
+- successful process termination writes an app-owned note into the exact worker session;
+- successful process termination emits an info log naming worker, process id and reason;
+- Settings UI explains that worker chat/history remain reusable;
+- all locale catalogs on that branch include the new setting copy;
+- focused GC/config/feature-parity/i18n tests: 101/101 passed before the later upstream locale merge;
+- typecheck + production build passed;
+- before/after Settings screenshots attached.
+
+The branch then merged upstream Russian/worker-health localization changes. Current upstream main still has the narrow Russian health-label gap tracked by #925 / PR #926; do not call #919 latest-main green until #926 lands and #919 is resynced/retested.
