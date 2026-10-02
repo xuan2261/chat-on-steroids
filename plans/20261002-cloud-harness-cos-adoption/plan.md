@@ -44,12 +44,12 @@ Cloud Harness is a remote/local execution harness with structured workspace/sess
 | Order | Candidate PR | Lineage | Dependency | Status |
 |---|---|---|---|---|
 | 00 | Cross-turn retained exec reassociation | #892 / PR #899 | none | MERGED — ships in 2.1.26 |
-| 01 | Send-time Core capability/preflight projection | #906 / PR #907; lineage #208, #482 | none | DRAFT PR — CHECKS RUNNING |
+| 01 | Send-time Core capability/preflight projection | #906 / PR #907; lineage #208, #482 | none | READY FOR REVIEW — CHECKS GREEN |
 | 02 | Retained exec operation-state projection | #36, #892, #208 | PR 00 | DEFERRED — no concrete gap after current-main scout |
-| 03 | Worker-overview health projection | #908 / PR #909; lineage #210, #482, #221 | independent | DRAFT PR — UI EVIDENCE PENDING |
+| 03 | Worker-overview health projection | #908 / PR #909; lineage #210, #482, #221 | independent | READY FOR REVIEW — CHECKS GREEN |
 | 04 | Sleeping-worker runtime resource GC | #215, #482 | PR 00; reuse PR 03 if useful, never depend on prose classification | PLANNED |
-| 05 | Remote MCP plugin network/credential hardening | #208, #360 | audit must prove a concrete gap first | RESEARCH GATE |
-| 06 | Skill/context provenance and package identity | #208, #360, #380 | preserve existing Skills/Plugins owners | PLANNED |
+| 05 | Remote MCP plugin network/credential hardening | #208, #360 | security-sensitive follow-up stays private | AUDIT COMPLETE — PRIVATE CHANNEL FOR ANY FINDINGS |
+| 06 | Installed GitHub Skill provenance projection | #917 / PR #918; lineage #514, #208 | independent | DRAFT PR — CI RUNNING |
 | 07 | Artifact/checkpoint lifecycle, starting narrow | #889, #208 | require concrete second use case before generic abstraction | PLANNED |
 | 08 | Optional Cloud Harness remote-executor adapter | #208, #482 | only after 01–07 evidence | DEFERRED |
 
@@ -59,13 +59,13 @@ Cloud Harness is a remote/local execution harness with structured workspace/sess
 - [x] PR #899 moved from Draft to Ready for review after all exact-head checks passed.
 - [x] Prepare PR 01 implementation on fork branch `feat/core-capability-preflight`; no new MCP tool in the first slice.
 - [x] Opened Phase 01 upstream issue #906 and draft PR #907 after #899 review gate cleared.
-- [ ] PR #907: synced to current `main` `3929c96…`; head `e6fc8d13…`; CodeQL green, cross-platform CI running, current checklist rerun in progress.
+- [x] PR #907: exact-head CI, CodeQL and PR checklist green; marked Ready for review.
 - [x] Opened independent Phase 03 issue #908 and draft PR #909 after verifying #221 was closed for lacking a production consumer, not for a rejected design.
-- [ ] PR #909: synced head `be31881a…`; broker-authority precedence hardened; fresh CodeQL/CI/checklist reruns in progress; visual screenshots remain the known readiness gate.
+- [x] PR #909: exact-head CI, CodeQL, fail-first and PR checklist green; placeholder before/after screenshots attached; marked Ready for review.
 - [ ] Keep active upstream WIP bounded: max ~3 PRs, with new ones draft until checks are green.
 - [ ] For every later phase, re-read current upstream before coding; closed roadmap issues are design lineage, not proof current code is unchanged.
-- [ ] Before PR 05, complete an SSRF/network audit of remote plugin transport and OAuth paths.
-- [ ] Before PR 06, inventory what provenance/version/hash data Skills and Codex-plugin bridges already own.
+- [x] Completed remote plugin/OAuth network audit; any security-sensitive follow-up is handled only through the repository's private SECURITY.md process.
+- [x] Inventoried existing Skill provenance: CoS already owns exact source/ref/commit/revision/SKILL.md hash. Opened #917 / draft PR #918 to project only the installed ref + short commit in the desktop UI.
 - [ ] Before PR 07, finish or coordinate with #889; do not build generic retained artifacts only for nominal parity.
 - [ ] Re-evaluate PR 08 last; prefer ordinary remote MCP plugin integration over embedding Docker/VM execution in CoS Desktop.
 
