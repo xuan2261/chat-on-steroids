@@ -51,7 +51,11 @@ Cloud Harness is a remote/local execution harness with structured workspace/sess
 | 05 | Remote MCP plugin network/credential hardening | #208, #360 | security-sensitive follow-up stays private | AUDIT COMPLETE — PRIVATE CHANNEL FOR ANY FINDINGS |
 | 06 | Installed GitHub Skill provenance projection | #917 / PR #918; lineage #514, #208 | independent | READY FOR REVIEW — CHECKS GREEN |
 | 07 | Artifact/checkpoint lifecycle, starting narrow | #889, #208 | maintainer has announced implementation plan | HOLD — AVOID DUPLICATE PR |
-| 08 | Optional Cloud Harness remote-executor adapter | #208, #482 | only after 01–07 evidence | DEFERRED |
+| 08 | Optional Cloud Harness remote-executor adapter | #208, #482; docs sync #920 / PR #921 | only after 01–07 evidence | DEFERRED — current Plugins surface already supports large catalogs |
+
+## Current Plugins compatibility finding
+
+Current CoS implementation publishes catalogs larger than 64 tools when they fit the schema-byte budget. The live limits are 250 KB of complete schemas plus a separate 256-tool emergency ceiling. The old 64-tool statement was stale documentation, not a runtime limit. Issue #920 / draft PR #921 updates the docs. This materially reduces the need for a Cloud Harness-specific curation adapter solely because of tool count.
 
 ## Global TODO
 
