@@ -1,31 +1,42 @@
 # Phase 04 — Sleeping-worker runtime resource GC
 
-**Status:** PLANNED  
+**Status:** DRAFT PR #919 — CHECKS RUNNING  
 **Lineage:** #215, #482  
-**Cloud Harness concept:** TTL/resource cleanup separated from durable workspace identity
+**PR:** #919  
+**Cloud Harness concept:** durable identity lifetime != revocable runtime lifetime
 
-## Goal
+## Current implementation
 
-Allow a sleeping worker's revocable runtime resources to end while its durable worker/chat/history identity remains reusable.
+- Branch: `feat/sleeping-worker-runtime-gc`
+- Base: upstream `a1879601684712cbc3d6100ee4fe2dacbdf1b7b4`
+- Fail-first commit: `a9b90a6ec094aebed52509d6897321a49bb4ec33`
+- Coordinator commit: `4b0e81c8db2a25da8a166db19a3d920cacec346a`
+- Lifecycle/timer hook: `c808524a5e5b7c3a70e97ce7eb855cec84720b4a`
+- Diff: 3 files, 568 additions / 1 deletion.
 
-## Required invariants
+## Runtime policy
 
-- durable identity lifetime != process/runtime lifetime
-- exact run + worker + conversation ownership
-- sleeping is necessary but not sufficient
-- re-check state/ownership immediately before cleanup
-- wake/activity race aborts cleanup
-- unknown process ownership fails closed
-- worker history, inbox, project binding and conversation lineage survive
+- Retention threshold: 30 minutes sleeping.
+- Sweep cadence: one process-owned 10-minute interval.
+- No per-worker timer.
+- No worker liveness claim.
+- No history/session deletion.
+- Completed unread output is preserved.
+- Exact ownership is removed synchronously before async termination.
+- Failed termination restores ownership only when the same process id is still live and unowned.
+- Shutdown stops/drains GC before normal process cleanup.
 
-## Implementation shape
+## Verification
 
-Use a coarse existing maintenance cadence or one explicitly owned sweep. Do not create a high-frequency watchdog.
+- [x] Focused runtime-GC tests: 18/18 passed locally.
+- [x] Typecheck passed locally.
+- [x] Production build passed locally.
+- [x] PR checklist passed.
+- [ ] CI running.
+- [ ] CodeQL running.
+- [ ] Final exact-head review after CI settles.
+- [ ] Mark Ready only when all exact-head checks are green.
 
-## Tests
+## Invariants
 
-Follow #215's race matrix: before/after threshold, active/waking/detached exclusions, ownership change, in-flight work, ambiguous owner, duplicate `worker-1` names across runs and wake-after-GC.
-
-## Dependency
-
-Phase 00 must be merged. Phase 03 may supply evidence but must not become cleanup authority by itself.
+Broker owns worker lifecycle; session store owns durable attachment; exec ownership owns custody; unified exec manager owns process lifetime. GC coordinates them and stores no second authority.
