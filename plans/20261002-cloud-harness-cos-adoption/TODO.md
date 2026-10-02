@@ -7,7 +7,7 @@ Canonical plan: `plans/20261002-cloud-harness-cos-adoption/plan.md`
 - [x] PR #899: workflows executed on exact head.
 - [x] PR #899: fail-first, CI, CodeQL and PR checklist all passed on `cc00a16…`.
 - [x] PR #899: final code/security review completed.
-- [x] PR #899: marked Ready for review.
+- [x] PR #899: merged; maintainer confirmed release target 2.1.26.
 
 ## Next PR — Capability/preflight projection
 
@@ -20,12 +20,12 @@ Canonical plan: `plans/20261002-cloud-harness-cos-adoption/plan.md`
 - [ ] Run focused tests/typecheck/verify when runtime is available.
 - [x] Static diff/security review: 2 files, +18/-0; projection-only.
 - [x] Opened upstream issue #906 and draft PR #907 after #899 cleared its review gate.
-- [ ] PR #907: get fork workflows approved/executing; require fail-first/CI/CodeQL/PR checklist green before Ready for review.
+- [ ] PR #907: synced to current main at `41eb8b5b…`; checklist green, CodeQL running, CI queued. Move Ready only when all exact-head checks are green.
 
 ## Later
 
 - [ ] Retained exec operation-state projection.
-- [ ] Read-only agent health projection (#210 lineage).
+- [x] Opened focused worker-overview health issue #908 + draft PR #909 after incorporating #221 maintainer feedback.\n- [ ] PR #909: fail-first + CodeQL green; wait for main CI, then add required before/after screenshots and `verify:ui` evidence before Ready.
 - [ ] Sleeping-worker runtime GC (#215 lineage).
 - [ ] Remote plugin network/credential audit; implement only proven gaps.
 - [ ] Skill/context provenance and package identity (#208/#360/#380 lineage).
