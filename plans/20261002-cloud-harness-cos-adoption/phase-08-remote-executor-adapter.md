@@ -28,3 +28,17 @@ Do not embed Cloud Harness Docker socket/runner/VPS control plane into the CoS E
 - tool-surface/discovery budget acceptable
 - failure/ambiguous side-effect semantics documented
 - independent remote executor remains replaceable
+
+
+## Current Plugins compatibility — 2026-10-02
+
+Current CoS Plugins exposure is not limited to 64 tools anymore:
+
+- complete schema bytes are normally bounded to 250 KB;
+- 256 tools is the separate emergency catalog ceiling;
+- the current regression suite explicitly publishes 118 tools in full when they fit the byte budget;
+- per-tool enabled/published state remains visible in the Plugins UI.
+
+Therefore a Cloud Harness-specific adapter is not justified solely by its tool count. First test the ordinary remote Streamable HTTP integration and actual schema-byte footprint.
+
+Issue #920 / PR #921 corrects the stale 64-tool documentation.
