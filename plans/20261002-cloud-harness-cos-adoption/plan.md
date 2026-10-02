@@ -23,7 +23,7 @@ Cloud Harness is a remote/local execution harness with structured workspace/sess
 ## Baseline
 
 - CoS upstream baseline for this plan: `bfa35eb2a2e2fa802f76499b38305b8dc9b6df1e`.
-- Current in-flight repair: upstream PR #899, fixing issue #892.
+- Phase 00 completed upstream: PR #899 merged for issue #892 and is slated for release 2.1.26.
 - CoS roadmap lineage: #482 and architecture audit #208.
 - Cloud Harness reference: `bestagentkits/cloud-harness-mcp`, especially `workspace_capabilities`, retained operation/session APIs, provenance, credential isolation, artifact retention and executor lifecycle.
 - Evidence levels stay separate: source → tests → build → package → installed/runtime behavior.
@@ -43,10 +43,10 @@ Cloud Harness is a remote/local execution harness with structured workspace/sess
 
 | Order | Candidate PR | Lineage | Dependency | Status |
 |---|---|---|---|---|
-| 00 | Cross-turn retained exec reassociation | #892 / PR #899 | none | READY FOR UPSTREAM REVIEW — CI GREEN |
-| 01 | Send-time Core capability/preflight projection | #906 / PR #907; lineage #208, #482 | none | DRAFT PR — WORKFLOW APPROVAL PENDING |
+| 00 | Cross-turn retained exec reassociation | #892 / PR #899 | none | MERGED — ships in 2.1.26 |
+| 01 | Send-time Core capability/preflight projection | #906 / PR #907; lineage #208, #482 | none | DRAFT PR — CHECKS RUNNING |
 | 02 | Retained exec operation-state projection | #36, #892, #208 | PR 00 | PLANNED |
-| 03 | Evidence-based read-only agent health projection | #210, #482 | none; preferably after PR 02 | PLANNED |
+| 03 | Worker-overview health projection | #908 / PR #909; lineage #210, #482, #221 | independent | DRAFT PR — UI EVIDENCE PENDING |
 | 04 | Sleeping-worker runtime resource GC | #215, #482 | PR 00; reuse PR 03 if useful, never depend on prose classification | PLANNED |
 | 05 | Remote MCP plugin network/credential hardening | #208, #360 | audit must prove a concrete gap first | RESEARCH GATE |
 | 06 | Skill/context provenance and package identity | #208, #360, #380 | preserve existing Skills/Plugins owners | PLANNED |
@@ -59,7 +59,10 @@ Cloud Harness is a remote/local execution harness with structured workspace/sess
 - [x] PR #899 moved from Draft to Ready for review after all exact-head checks passed.
 - [x] Prepare PR 01 implementation on fork branch `feat/core-capability-preflight`; no new MCP tool in the first slice.
 - [x] Opened Phase 01 upstream issue #906 and draft PR #907 after #899 review gate cleared.
-- [ ] PR #907: approve/run fork workflows; require fail-first/CI/CodeQL/PR checklist on exact head before Ready for review.
+- [ ] PR #907: wait for exact-head CI + CodeQL to finish; PR checklist is already green on synced head `41eb8b5b…`.
+- [x] Opened independent Phase 03 issue #908 and draft PR #909 after verifying #221 was closed for lacking a production consumer, not for a rejected design.
+- [ ] PR #909: main CI still running; fail-first + CodeQL green; PR checklist blocked only on required before/after screenshots and `verify:ui` evidence.
+- [ ] Keep active upstream WIP bounded: max ~3 PRs, with new ones draft until checks are green.
 - [ ] For every later phase, re-read current upstream before coding; closed roadmap issues are design lineage, not proof current code is unchanged.
 - [ ] Before PR 05, complete an SSRF/network audit of remote plugin transport and OAuth paths.
 - [ ] Before PR 06, inventory what provenance/version/hash data Skills and Codex-plugin bridges already own.
