@@ -47,10 +47,10 @@ Cloud Harness is a remote/local execution harness with structured workspace/sess
 | 01 | Send-time Core capability/preflight projection | #906 / PR #907; lineage #208, #482 | none | READY FOR REVIEW — CHECKS GREEN |
 | 02 | Retained exec operation-state projection | #36, #892, #208 | PR 00 | DEFERRED — no concrete gap after current-main scout |
 | 03 | Worker-overview health projection | #908 / PR #909; lineage #210, #482, #221 | independent | READY FOR REVIEW — CHECKS GREEN |
-| 04 | Sleeping-worker runtime resource GC | #215, #482 | PR 00; reuse PR 03 if useful, never depend on prose classification | PLANNED |
+| 04 | Sleeping-worker runtime resource GC | #215, #482 / PR #919 | PR 00 | DRAFT PR — CHECKLIST GREEN, CI/CODEQL RUNNING |
 | 05 | Remote MCP plugin network/credential hardening | #208, #360 | security-sensitive follow-up stays private | AUDIT COMPLETE — PRIVATE CHANNEL FOR ANY FINDINGS |
-| 06 | Installed GitHub Skill provenance projection | #917 / PR #918; lineage #514, #208 | independent | DRAFT PR — CI RUNNING |
-| 07 | Artifact/checkpoint lifecycle, starting narrow | #889, #208 | require concrete second use case before generic abstraction | PLANNED |
+| 06 | Installed GitHub Skill provenance projection | #917 / PR #918; lineage #514, #208 | independent | READY FOR REVIEW — CHECKS GREEN |
+| 07 | Artifact/checkpoint lifecycle, starting narrow | #889, #208 | maintainer has announced implementation plan | HOLD — AVOID DUPLICATE PR |
 | 08 | Optional Cloud Harness remote-executor adapter | #208, #482 | only after 01–07 evidence | DEFERRED |
 
 ## Global TODO
