@@ -50,8 +50,8 @@ The worker row renders the health label and a bounded hover explanation.
 
 - [x] Fail-first job passed against base-branch code.
 - [x] CodeQL passed.
-- [ ] Main CI still running.
-- [ ] PR checklist currently fails only because visible UI changes require before/after screenshots.
+- [ ] Fresh main CI still running after broker-authority precedence fixes.
+- [ ] PR checklist remains blocked only because visible UI changes require real before/after screenshots.
 - [ ] Add screenshots with placeholder data.
 - [ ] Run/obtain `verify:ui` evidence before Ready for review.
 - [ ] Final diff/security review after the exact-head checks settle.
@@ -59,3 +59,13 @@ The worker row renders the health label and a bounded hover explanation.
 ## Security invariant
 
 The projection is read-only. Broker/session state remains authoritative; the renderer cannot wake, retry, terminate or reclassify a worker's lifecycle.
+
+
+## Broker-authority follow-up
+
+Static review found that stale session activity must not override terminal/non-running broker lifecycle state. Added regressions and fixes:
+
+- `45291b7e…` + `bfe6a7ad…`: broker `failed` wins over stale working/active-turn evidence.
+- `5e58474f…` + `05edd8c5…`: broker `sleeping` / `finished` likewise remain authoritative.
+
+`detached` intentionally differs: exact active work may still be healthy because browser absence does not prove server-side work ended.
