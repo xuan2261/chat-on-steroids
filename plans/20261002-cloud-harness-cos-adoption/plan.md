@@ -45,7 +45,7 @@ Cloud Harness is a remote/local execution harness with structured workspace/sess
 |---|---|---|---|---|
 | 00 | Cross-turn retained exec reassociation | #892 / PR #899 | none | MERGED — ships in 2.1.26 |
 | 01 | Send-time Core capability/preflight projection | #906 / PR #907; lineage #208, #482 | none | DRAFT PR — CHECKS RUNNING |
-| 02 | Retained exec operation-state projection | #36, #892, #208 | PR 00 | PLANNED |
+| 02 | Retained exec operation-state projection | #36, #892, #208 | PR 00 | DEFERRED — no concrete gap after current-main scout |
 | 03 | Worker-overview health projection | #908 / PR #909; lineage #210, #482, #221 | independent | DRAFT PR — UI EVIDENCE PENDING |
 | 04 | Sleeping-worker runtime resource GC | #215, #482 | PR 00; reuse PR 03 if useful, never depend on prose classification | PLANNED |
 | 05 | Remote MCP plugin network/credential hardening | #208, #360 | audit must prove a concrete gap first | RESEARCH GATE |
@@ -59,9 +59,9 @@ Cloud Harness is a remote/local execution harness with structured workspace/sess
 - [x] PR #899 moved from Draft to Ready for review after all exact-head checks passed.
 - [x] Prepare PR 01 implementation on fork branch `feat/core-capability-preflight`; no new MCP tool in the first slice.
 - [x] Opened Phase 01 upstream issue #906 and draft PR #907 after #899 review gate cleared.
-- [ ] PR #907: PR checklist + CodeQL are green on synced head `41eb8b5b…`; wait only for main CI before Ready for review.
+- [ ] PR #907: branch synced to current `main`; CodeQL + prior checklist green on exact head `f1069137…`; cross-platform CI still running.
 - [x] Opened independent Phase 03 issue #908 and draft PR #909 after verifying #221 was closed for lacking a production consumer, not for a rejected design.
-- [ ] PR #909: main CI still running; fail-first + CodeQL green; PR checklist blocked only on required before/after screenshots and `verify:ui` evidence.
+- [ ] PR #909: broker-authority precedence hardened through `05edd8c5…`; CodeQL green, fresh CI running; visual checklist remains blocked on real before/after screenshots.
 - [ ] Keep active upstream WIP bounded: max ~3 PRs, with new ones draft until checks are green.
 - [ ] For every later phase, re-read current upstream before coding; closed roadmap issues are design lineage, not proof current code is unchanged.
 - [ ] Before PR 05, complete an SSRF/network audit of remote plugin transport and OAuth paths.
