@@ -20,7 +20,8 @@ This revision does not resurrect #221 unchanged. It projects only evidence the c
 - Implementation commit: `3e7f449ee21f38bb0ae2e59ce49e78a9d02311df`
 - Compatibility cleanup: `98744b7f01947ba3c6723bb856bc70a12a14221a`
 - Test cleanup: `cbd1e858e56a0894b16f8a1b57f7ba0999e26eb2`
-- Diff: 4 files, +178/-3.
+- Synced head: `be31881ab5b1960e9f5a77be99a5dd51f032f5f8` on upstream `main` `3929c96…`.
+- Diff remains limited to the projection, worker-pane consumer and focused tests.
 
 ## Projection
 
@@ -50,8 +51,8 @@ The worker row renders the health label and a bounded hover explanation.
 
 - [x] Fail-first job passed against base-branch code.
 - [x] CodeQL passed.
-- [ ] Fresh main CI still running after broker-authority precedence fixes.
-- [ ] PR checklist remains blocked only because visible UI changes require real before/after screenshots.
+- [ ] Fresh CI is running on synced head `be31881a…` after the broker-authority precedence fixes.
+- [ ] Prior PR checklist failed only because visible UI changes require real before/after screenshots; current checklist rerun is queued/in progress.
 - [ ] Add screenshots with placeholder data.
 - [ ] Run/obtain `verify:ui` evidence before Ready for review.
 - [ ] Final diff/security review after the exact-head checks settle.
