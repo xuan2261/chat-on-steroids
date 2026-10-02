@@ -20,15 +20,17 @@ Canonical plan: `plans/20261002-cloud-harness-cos-adoption/plan.md`
 - [ ] Run focused tests/typecheck/verify when runtime is available.
 - [x] Static diff/security review: 2 files, +18/-0; projection-only.
 - [x] Opened upstream issue #906 and draft PR #907 after #899 cleared its review gate.
-- [ ] PR #907: synced head `e6fc8d13…` on current main `3929c96…`; CodeQL green, CI + current checklist rerun still running. Move Ready only when exact-head checks settle green.
+- [x] PR #907: CI + CodeQL + PR checklist green; Ready for review.
 
 ## Later
 
 - [x] Scout retained exec operation-state projection; defer PR because current main already has owner-scoped running/exited-unread/replay semantics and no concrete missing workflow was proven.
 - [x] Opened focused worker-overview health issue #908 + draft PR #909 after incorporating #221 maintainer feedback.\n- [ ] PR #909: synced head `be31881a…`; fresh CodeQL/CI/checklist reruns in progress. Real before/after screenshots remain mandatory before Ready.
 - [ ] Sleeping-worker runtime GC (#215 lineage).
-- [ ] Remote plugin network/credential audit; implement only proven gaps.
-- [ ] Skill/context provenance and package identity (#208/#360/#380 lineage).
+- [x] Remote plugin/OAuth network audit completed; any security-sensitive follow-up stays in the repository's private reporting channel.
+- [x] Skill provenance inventory completed; CoS already owns exact GitHub origin/commit/revision/hash metadata.
+- [x] Opened #917 + draft PR #918 to show installed `ref @ short-commit` without changing provenance authority.
+- [ ] PR #918: wait for exact-head cross-platform CI; checklist/fail-first + CodeQL already green.
 - [ ] Narrow artifact lifecycle starting with #889.
 - [ ] Re-evaluate Cloud Harness remote-executor adapter last.
 
