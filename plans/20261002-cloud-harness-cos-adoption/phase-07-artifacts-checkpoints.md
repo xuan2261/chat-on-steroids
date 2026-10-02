@@ -1,6 +1,6 @@
 # Phase 07 — Artifact/checkpoint lifecycle, starting narrow
 
-**Status:** PLANNED  
+**Status:** HOLD — MAINTAINER ANNOUNCED IMPLEMENTATION  
 **Lineage:** #889, #208  
 **Cloud Harness concept:** retained artifacts snapshot/list/read/restore/delete
 
@@ -26,3 +26,10 @@ Audit whether session assets/checkpoints already satisfy other retention workflo
 ## Stop criteria
 
 One image-export feature is not sufficient justification for cloning Cloud Harness's complete `artifacts_*` API.
+
+
+## Coordination note — 2026-10-02
+
+Issue #889 remains open, but the maintainer has publicly described the intended safe implementation and said they plan to start it after 2.1.25.
+
+Do not open a competing PR while that work is actively planned. Continue to monitor #889 and only resume this phase if the maintainer asks for help, posts a branch/PR that needs contribution, or the plan goes stale.
