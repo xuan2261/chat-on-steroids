@@ -44,7 +44,7 @@ Cloud Harness is a remote/local execution harness with structured workspace/sess
 | Order | Candidate PR | Lineage | Dependency | Status |
 |---|---|---|---|---|
 | 00 | Cross-turn retained exec reassociation | #892 / PR #899 | none | IN FLIGHT |
-| 01 | Send-time Core capability/preflight projection | #208, #482 | none; submit after #899 to reduce reviewer load | READY NEXT |
+| 01 | Send-time Core capability/preflight projection | #208, #482 | none; submit after #899 to reduce reviewer load | PREPARED ON FORK — NOT YET VERIFIED |
 | 02 | Retained exec operation-state projection | #36, #892, #208 | PR 00 | PLANNED |
 | 03 | Evidence-based read-only agent health projection | #210, #482 | none; preferably after PR 02 | PLANNED |
 | 04 | Sleeping-worker runtime resource GC | #215, #482 | PR 00; reuse PR 03 if useful, never depend on prose classification | PLANNED |
@@ -57,7 +57,8 @@ Cloud Harness is a remote/local execution harness with structured workspace/sess
 
 - [ ] Get PR #899 workflows actually executing; do not mark verification green until jobs run.
 - [ ] Move #899 from Draft only after fail-first/CI/CodeQL/PR checklist evidence is green.
-- [ ] Implement PR 01 using current send-time `currentCoreInstructions()`; no new MCP tool in the first slice.
+- [x] Prepare PR 01 implementation on fork branch `feat/core-capability-preflight`; no new MCP tool in the first slice.
+- [ ] Verify PR 01 branch with focused tests/typecheck/`npm run verify`, then open upstream only after PR #899 review gate is clear.
 - [ ] For every later phase, re-read current upstream before coding; closed roadmap issues are design lineage, not proof current code is unchanged.
 - [ ] Before PR 05, complete an SSRF/network audit of remote plugin transport and OAuth paths.
 - [ ] Before PR 06, inventory what provenance/version/hash data Skills and Codex-plugin bridges already own.

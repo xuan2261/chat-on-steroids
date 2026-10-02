@@ -11,15 +11,15 @@ Canonical plan: `plans/20261002-cloud-harness-cos-adoption/plan.md`
 
 ## Next PR — Capability/preflight projection
 
-- [ ] Rebase/start from current upstream `main`.
-- [ ] Add fail-first tests for send-time effective capability state.
-- [ ] Implement bounded current-authority instructions from existing `ToolContext`.
-- [ ] Do not add a new MCP tool in the first slice.
-- [ ] Confirm no native host paths or credentials are emitted.
-- [ ] Confirm live guards remain authority.
+- [x] Start from current upstream `main` (`bfa35eb2…`).
+- [x] Add fail-first test for send-time effective capability state (`f459a5b…`).
+- [x] Implement bounded current-authority instructions from existing `ToolContext` (`236f248…`).
+- [x] No new MCP tool in the first slice.
+- [x] Static review: snapshot contains only capability booleans/features; test asserts native approved path is absent.
+- [x] Static review: live guards remain unchanged and authoritative.
 - [ ] Run focused tests/typecheck/verify when runtime is available.
-- [ ] Review diff and security invariants.
-- [ ] Open upstream PR with `Refs #208` and `Refs #482` after PR #899 is no longer blocking reviewer attention.
+- [x] Static diff/security review: 2 files, +18/-0; projection-only.
+- [ ] Open upstream PR with `Refs #208` and `Refs #482` after PR #899 is no longer blocking reviewer attention. Branch: `feat/core-capability-preflight`.
 
 ## Later
 
