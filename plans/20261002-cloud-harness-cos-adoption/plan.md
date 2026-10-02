@@ -59,9 +59,9 @@ Cloud Harness is a remote/local execution harness with structured workspace/sess
 - [x] PR #899 moved from Draft to Ready for review after all exact-head checks passed.
 - [x] Prepare PR 01 implementation on fork branch `feat/core-capability-preflight`; no new MCP tool in the first slice.
 - [x] Opened Phase 01 upstream issue #906 and draft PR #907 after #899 review gate cleared.
-- [ ] PR #907: branch synced to current `main`; CodeQL + prior checklist green on exact head `f1069137…`; cross-platform CI still running.
+- [ ] PR #907: synced to current `main` `3929c96…`; head `e6fc8d13…`; CodeQL green, cross-platform CI running, current checklist rerun in progress.
 - [x] Opened independent Phase 03 issue #908 and draft PR #909 after verifying #221 was closed for lacking a production consumer, not for a rejected design.
-- [ ] PR #909: broker-authority precedence hardened through `05edd8c5…`; CodeQL green, fresh CI running; visual checklist remains blocked on real before/after screenshots.
+- [ ] PR #909: synced head `be31881a…`; broker-authority precedence hardened; fresh CodeQL/CI/checklist reruns in progress; visual screenshots remain the known readiness gate.
 - [ ] Keep active upstream WIP bounded: max ~3 PRs, with new ones draft until checks are green.
 - [ ] For every later phase, re-read current upstream before coding; closed roadmap issues are design lineage, not proof current code is unchanged.
 - [ ] Before PR 05, complete an SSRF/network audit of remote plugin transport and OAuth paths.
