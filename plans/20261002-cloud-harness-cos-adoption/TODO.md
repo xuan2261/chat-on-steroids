@@ -20,7 +20,7 @@ Canonical plan: `plans/20261002-cloud-harness-cos-adoption/plan.md`
 - [ ] Run focused tests/typecheck/verify when runtime is available.
 - [x] Static diff/security review: 2 files, +18/-0; projection-only.
 - [x] Opened upstream issue #906 and draft PR #907 after #899 cleared its review gate.
-- [ ] PR #907: synced to current main at `41eb8b5b…`; checklist green, CodeQL running, CI queued. Move Ready only when all exact-head checks are green.
+- [ ] PR #907: synced to current main at `41eb8b5b…`; checklist + CodeQL green, main CI running. Move Ready only when all exact-head checks are green.
 
 ## Later
 
