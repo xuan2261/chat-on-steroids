@@ -13,8 +13,8 @@
 - Test commit: `f459a5b0e94bce29931c542e48f949d0f820bcd1`
 - Implementation commit: `236f248bc7e85a32ca9b7ebdd86a7f43d5b52d8d`
 - Diff: 2 files, +18/-0.
-- Synced head: `41eb8b5b60f97d088647dc601d8c17b62ee0f362` on current upstream `main`.
-- Runtime verification: PARTIAL — PR checklist + CodeQL are green; main CI is running on exact head `41eb8b5b…`.
+- Synced head: `f10691379e8f1ad8da045db5e946ef5d24c4c7a5` on upstream `main` `6d592f2…`.
+- Runtime verification: PARTIAL — CodeQL + prior PR checklist are green; cross-platform CI is still running on exact head `f1069137…`.
 
 Static review confirms the branch only adds a bounded Core-authority instruction line and its fail-first assertion; no tool registry, permission guard, persisted state or host path authority is changed.
 
