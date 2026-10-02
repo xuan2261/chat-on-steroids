@@ -4,10 +4,10 @@ Canonical plan: `plans/20261002-cloud-harness-cos-adoption/plan.md`
 
 ## Now
 
-- [ ] PR #899: get GitHub workflows out of `action_required` and actually executing.
-- [ ] PR #899: verify fail-first, CI, CodeQL and PR checklist on the exact head SHA.
-- [ ] PR #899: final code/security review.
-- [ ] PR #899: mark Ready for review only after evidence is green.
+- [x] PR #899: workflows executed on exact head.
+- [x] PR #899: fail-first, CI, CodeQL and PR checklist all passed on `cc00a16…`.
+- [x] PR #899: final code/security review completed.
+- [x] PR #899: marked Ready for review.
 
 ## Next PR — Capability/preflight projection
 
@@ -19,7 +19,8 @@ Canonical plan: `plans/20261002-cloud-harness-cos-adoption/plan.md`
 - [x] Static review: live guards remain unchanged and authoritative.
 - [ ] Run focused tests/typecheck/verify when runtime is available.
 - [x] Static diff/security review: 2 files, +18/-0; projection-only.
-- [ ] Open upstream PR with `Refs #208` and `Refs #482` after PR #899 is no longer blocking reviewer attention. Branch: `feat/core-capability-preflight`.
+- [x] Opened upstream issue #906 and draft PR #907 after #899 cleared its review gate.
+- [ ] PR #907: get fork workflows approved/executing; require fail-first/CI/CodeQL/PR checklist green before Ready for review.
 
 ## Later
 

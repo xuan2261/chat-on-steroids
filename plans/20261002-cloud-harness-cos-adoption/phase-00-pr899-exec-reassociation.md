@@ -1,6 +1,6 @@
 # Phase 00 — PR #899: retained exec reassociation
 
-**Status:** IN FLIGHT  
+**Status:** READY FOR UPSTREAM REVIEW — CI GREEN  
 **Issue:** #892  
 **PR:** #899
 
@@ -25,14 +25,15 @@ A later turn in the same proven ChatGPT conversation can reuse its retained PTY/
 
 ## Remaining TODO
 
-- [ ] Maintainer/fork workflow approval.
-- [ ] CI jobs actually start.
-- [ ] Fail-first check proves the changed test fails on main.
-- [ ] CI passes.
-- [ ] CodeQL passes.
-- [ ] PR checklist passes.
-- [ ] Re-review final head SHA.
-- [ ] Mark Ready for review only after the above evidence exists.
+- [x] Maintainer/fork workflow approval.
+- [x] CI jobs executed.
+- [x] Fail-first check passed against base-branch code.
+- [x] CI passed on Linux x64, Windows x64 and macOS arm64.
+- [x] CodeQL passed.
+- [x] PR checklist passed.
+- [x] Final diff/security review on exact head `cc00a16a44e0a057e3e15b98c05378904f4cc1d7`.
+- [x] PR marked Ready for review.
+- [ ] Maintainer review/merge.
 
 ## Abort criteria
 

@@ -1,17 +1,20 @@
 # Phase 01 — Send-time Core capability/preflight projection
 
-**Status:** PREPARED ON FORK — NOT YET VERIFIED  
+**Status:** DRAFT PR #907 — WORKFLOW APPROVAL PENDING  
 **Lineage:** #208, #482  
 **Cloud Harness concept:** `workspace_capabilities`
 
 ## Prepared implementation
 
+- Issue: `#906`
+- PR: `#907` (draft)
 - Branch: `feat/core-capability-preflight`
 - Base: upstream `bfa35eb2e2fa802f76499b38305b8dc9b6df1e`
 - Test commit: `f459a5b0e94bce29931c542e48f949d0f820bcd1`
 - Implementation commit: `236f248bc7e85a32ca9b7ebdd86a7f43d5b52d8d`
 - Diff: 2 files, +18/-0.
-- Runtime verification: NOT YET VERIFIED.
+- Synced head: `3e07846213f410ff9fba0ec142a0e78a00806808` on upstream `main` `3c0578f…`.
+- Runtime verification: NOT YET VERIFIED — CI / CodeQL / PR checklist are currently `action_required`.
 
 Static review confirms the branch only adds a bounded Core-authority instruction line and its fail-first assertion; no tool registry, permission guard, persisted state or host path authority is changed.
 
