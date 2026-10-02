@@ -59,7 +59,7 @@ Cloud Harness is a remote/local execution harness with structured workspace/sess
 - [x] PR #899 moved from Draft to Ready for review after all exact-head checks passed.
 - [x] Prepare PR 01 implementation on fork branch `feat/core-capability-preflight`; no new MCP tool in the first slice.
 - [x] Opened Phase 01 upstream issue #906 and draft PR #907 after #899 review gate cleared.
-- [ ] PR #907: wait for exact-head CI + CodeQL to finish; PR checklist is already green on synced head `41eb8b5b…`.
+- [ ] PR #907: PR checklist + CodeQL are green on synced head `41eb8b5b…`; wait only for main CI before Ready for review.
 - [x] Opened independent Phase 03 issue #908 and draft PR #909 after verifying #221 was closed for lacking a production consumer, not for a rejected design.
 - [ ] PR #909: main CI still running; fail-first + CodeQL green; PR checklist blocked only on required before/after screenshots and `verify:ui` evidence.
 - [ ] Keep active upstream WIP bounded: max ~3 PRs, with new ones draft until checks are green.
