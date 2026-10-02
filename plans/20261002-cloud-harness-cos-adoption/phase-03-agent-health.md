@@ -1,25 +1,41 @@
-# Phase 03 — Evidence-based read-only agent health projection
+# Phase 03 — Worker-overview read-only health projection
 
-**Status:** PLANNED  
-**Lineage:** #210, #482  
+**Status:** DRAFT PR #909 — UI EVIDENCE PENDING  
+**Issue:** #908  
+**PR:** #909  
+**Lineage:** #210, #482, closed PR #221  
 **Cloud Harness concept:** workspace/runtime status as a read-only projection
 
-## Goal
+## Why this shape
 
-Implement the smallest useful part of #210: a deterministic classifier over evidence CoS already owns.
+PR #221 proved the classifier direction but was closed because it had no production consumer. Maintainer feedback explicitly invited a focused version wired to the worker overview.
 
-## Scope
+This revision does not resurrect #221 unchanged. It projects only evidence the current worker pane already owns and displays the result immediately.
 
-Pure typed projection only:
+## Prepared implementation
 
-- broker lifecycle
-- exact identity state
-- running tool count
-- generating/active-turn evidence
-- browser presence/detach evidence
-- existing owner-defined wait/blocker information
+- Branch: `feat/agent-health-worker-overview`
+- Base: current upstream `main`
+- Fail-first commit: `852b763a37ba4fafd7f5bc5a5d08fab84772202e`
+- Implementation commit: `3e7f449ee21f38bb0ae2e59ce49e78a9d02311df`
+- Compatibility cleanup: `98744b7f01947ba3c6723bb856bc70a12a14221a`
+- Test cleanup: `cbd1e858e56a0894b16f8a1b57f7ba0999e26eb2`
+- Diff: 4 files, +178/-3.
 
-Return bounded typed fields such as activity/health/recommendedAction plus a concise human reason.
+## Projection
+
+Inputs are limited to:
+- exact broker worker/conversation binding
+- broker lifecycle state
+- session working evidence
+- active-turn evidence
+
+Outputs:
+- healthy
+- degraded
+- unknown
+
+The worker row renders the health label and a bounded hover explanation.
 
 ## Non-goals
 
@@ -27,12 +43,19 @@ Return bounded typed fields such as activity/health/recommendedAction plus a con
 - no automatic retry/reload/wake
 - no new timeout
 - no second worker lifecycle state machine
-- no parsing of reason strings for machine decisions
+- no control API changes
+- no stalled-worker deadline policy in this first consumer slice
 
-## Tests
+## Verification status
 
-Use the deterministic matrix already described in #210, including conflicting identity, in-flight tool work, sleeping/terminal states, detached browser evidence, existing deadlines and identical-input determinism.
+- [x] Fail-first job passed against base-branch code.
+- [x] CodeQL passed.
+- [ ] Main CI still running.
+- [ ] PR checklist currently fails only because visible UI changes require before/after screenshots.
+- [ ] Add screenshots with placeholder data.
+- [ ] Run/obtain `verify:ui` evidence before Ready for review.
+- [ ] Final diff/security review after the exact-head checks settle.
 
-## PR gate
+## Security invariant
 
-If current source already provides an equivalent pure projection by implementation time, close this phase as already handled instead of duplicating it.
+The projection is read-only. Broker/session state remains authoritative; the renderer cannot wake, retry, terminate or reclassify a worker's lifecycle.
