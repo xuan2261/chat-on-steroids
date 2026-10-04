@@ -1,0 +1,509 @@
+{
+  "evidence": "isolated production-markup/styles/i18n; not installed/provider",
+  "observations": [
+    {
+      "language": "fr",
+      "theme": "light",
+      "width": 900,
+      "zoom": 1,
+      "label": "Sélection automatique des compétences",
+      "hint": "Associez une compétence importée à son nom exact dans le message, pas au sujet. Un choix explicite de compétence reste toujours prioritaire.",
+      "badge": "Compétence sélectionnée automatiquement : /literal-skill"
+    },
+    {
+      "language": "fr",
+      "theme": "light",
+      "width": 900,
+      "zoom": 1.25,
+      "label": "Sélection automatique des compétences",
+      "hint": "Associez une compétence importée à son nom exact dans le message, pas au sujet. Un choix explicite de compétence reste toujours prioritaire.",
+      "badge": "Compétence sélectionnée automatiquement : /literal-skill"
+    },
+    {
+      "language": "fr",
+      "theme": "light",
+      "width": 1440,
+      "zoom": 1,
+      "label": "Sélection automatique des compétences",
+      "hint": "Associez une compétence importée à son nom exact dans le message, pas au sujet. Un choix explicite de compétence reste toujours prioritaire.",
+      "badge": "Compétence sélectionnée automatiquement : /literal-skill"
+    },
+    {
+      "language": "fr",
+      "theme": "light",
+      "width": 1440,
+      "zoom": 1.25,
+      "label": "Sélection automatique des compétences",
+      "hint": "Associez une compétence importée à son nom exact dans le message, pas au sujet. Un choix explicite de compétence reste toujours prioritaire.",
+      "badge": "Compétence sélectionnée automatiquement : /literal-skill"
+    },
+    {
+      "language": "fr",
+      "theme": "dark",
+      "width": 900,
+      "zoom": 1,
+      "label": "Sélection automatique des compétences",
+      "hint": "Associez une compétence importée à son nom exact dans le message, pas au sujet. Un choix explicite de compétence reste toujours prioritaire.",
+      "badge": "Compétence sélectionnée automatiquement : /literal-skill"
+    },
+    {
+      "language": "fr",
+      "theme": "dark",
+      "width": 900,
+      "zoom": 1.25,
+      "label": "Sélection automatique des compétences",
+      "hint": "Associez une compétence importée à son nom exact dans le message, pas au sujet. Un choix explicite de compétence reste toujours prioritaire.",
+      "badge": "Compétence sélectionnée automatiquement : /literal-skill"
+    },
+    {
+      "language": "fr",
+      "theme": "dark",
+      "width": 1440,
+      "zoom": 1,
+      "label": "Sélection automatique des compétences",
+      "hint": "Associez une compétence importée à son nom exact dans le message, pas au sujet. Un choix explicite de compétence reste toujours prioritaire.",
+      "badge": "Compétence sélectionnée automatiquement : /literal-skill"
+    },
+    {
+      "language": "fr",
+      "theme": "dark",
+      "width": 1440,
+      "zoom": 1.25,
+      "label": "Sélection automatique des compétences",
+      "hint": "Associez une compétence importée à son nom exact dans le message, pas au sujet. Un choix explicite de compétence reste toujours prioritaire.",
+      "badge": "Compétence sélectionnée automatiquement : /literal-skill"
+    },
+    {
+      "language": "ja",
+      "theme": "light",
+      "width": 900,
+      "zoom": 1,
+      "label": "スキルを自動選択",
+      "hint": "メッセージ内の正確な名前でインポート済みスキルを1つ照合します。話題からは選びません。明示的なスキル選択が常に優先されます。",
+      "badge": "自動選択したスキル：/literal-skill"
+    },
+    {
+      "language": "ja",
+      "theme": "light",
+      "width": 900,
+      "zoom": 1.25,
+      "label": "スキルを自動選択",
+      "hint": "メッセージ内の正確な名前でインポート済みスキルを1つ照合します。話題からは選びません。明示的なスキル選択が常に優先されます。",
+      "badge": "自動選択したスキル：/literal-skill"
+    },
+    {
+      "language": "ja",
+      "theme": "light",
+      "width": 1440,
+      "zoom": 1,
+      "label": "スキルを自動選択",
+      "hint": "メッセージ内の正確な名前でインポート済みスキルを1つ照合します。話題からは選びません。明示的なスキル選択が常に優先されます。",
+      "badge": "自動選択したスキル：/literal-skill"
+    },
+    {
+      "language": "ja",
+      "theme": "light",
+      "width": 1440,
+      "zoom": 1.25,
+      "label": "スキルを自動選択",
+      "hint": "メッセージ内の正確な名前でインポート済みスキルを1つ照合します。話題からは選びません。明示的なスキル選択が常に優先されます。",
+      "badge": "自動選択したスキル：/literal-skill"
+    },
+    {
+      "language": "ja",
+      "theme": "dark",
+      "width": 900,
+      "zoom": 1,
+      "label": "スキルを自動選択",
+      "hint": "メッセージ内の正確な名前でインポート済みスキルを1つ照合します。話題からは選びません。明示的なスキル選択が常に優先されます。",
+      "badge": "自動選択したスキル：/literal-skill"
+    },
+    {
+      "language": "ja",
+      "theme": "dark",
+      "width": 900,
+      "zoom": 1.25,
+      "label": "スキルを自動選択",
+      "hint": "メッセージ内の正確な名前でインポート済みスキルを1つ照合します。話題からは選びません。明示的なスキル選択が常に優先されます。",
+      "badge": "自動選択したスキル：/literal-skill"
+    },
+    {
+      "language": "ja",
+      "theme": "dark",
+      "width": 1440,
+      "zoom": 1,
+      "label": "スキルを自動選択",
+      "hint": "メッセージ内の正確な名前でインポート済みスキルを1つ照合します。話題からは選びません。明示的なスキル選択が常に優先されます。",
+      "badge": "自動選択したスキル：/literal-skill"
+    },
+    {
+      "language": "ja",
+      "theme": "dark",
+      "width": 1440,
+      "zoom": 1.25,
+      "label": "スキルを自動選択",
+      "hint": "メッセージ内の正確な名前でインポート済みスキルを1つ照合します。話題からは選びません。明示的なスキル選択が常に優先されます。",
+      "badge": "自動選択したスキル：/literal-skill"
+    },
+    {
+      "language": "ko",
+      "theme": "light",
+      "width": 900,
+      "zoom": 1,
+      "label": "스킬 자동 선택",
+      "hint": "메시지의 주제가 아니라 정확한 이름으로 가져온 스킬 하나를 찾습니다. 명시적으로 선택한 스킬이 항상 우선합니다.",
+      "badge": "자동 선택된 스킬: /literal-skill"
+    },
+    {
+      "language": "ko",
+      "theme": "light",
+      "width": 900,
+      "zoom": 1.25,
+      "label": "스킬 자동 선택",
+      "hint": "메시지의 주제가 아니라 정확한 이름으로 가져온 스킬 하나를 찾습니다. 명시적으로 선택한 스킬이 항상 우선합니다.",
+      "badge": "자동 선택된 스킬: /literal-skill"
+    },
+    {
+      "language": "ko",
+      "theme": "light",
+      "width": 1440,
+      "zoom": 1,
+      "label": "스킬 자동 선택",
+      "hint": "메시지의 주제가 아니라 정확한 이름으로 가져온 스킬 하나를 찾습니다. 명시적으로 선택한 스킬이 항상 우선합니다.",
+      "badge": "자동 선택된 스킬: /literal-skill"
+    },
+    {
+      "language": "ko",
+      "theme": "light",
+      "width": 1440,
+      "zoom": 1.25,
+      "label": "스킬 자동 선택",
+      "hint": "메시지의 주제가 아니라 정확한 이름으로 가져온 스킬 하나를 찾습니다. 명시적으로 선택한 스킬이 항상 우선합니다.",
+      "badge": "자동 선택된 스킬: /literal-skill"
+    },
+    {
+      "language": "ko",
+      "theme": "dark",
+      "width": 900,
+      "zoom": 1,
+      "label": "스킬 자동 선택",
+      "hint": "메시지의 주제가 아니라 정확한 이름으로 가져온 스킬 하나를 찾습니다. 명시적으로 선택한 스킬이 항상 우선합니다.",
+      "badge": "자동 선택된 스킬: /literal-skill"
+    },
+    {
+      "language": "ko",
+      "theme": "dark",
+      "width": 900,
+      "zoom": 1.25,
+      "label": "스킬 자동 선택",
+      "hint": "메시지의 주제가 아니라 정확한 이름으로 가져온 스킬 하나를 찾습니다. 명시적으로 선택한 스킬이 항상 우선합니다.",
+      "badge": "자동 선택된 스킬: /literal-skill"
+    },
+    {
+      "language": "ko",
+      "theme": "dark",
+      "width": 1440,
+      "zoom": 1,
+      "label": "스킬 자동 선택",
+      "hint": "메시지의 주제가 아니라 정확한 이름으로 가져온 스킬 하나를 찾습니다. 명시적으로 선택한 스킬이 항상 우선합니다.",
+      "badge": "자동 선택된 스킬: /literal-skill"
+    },
+    {
+      "language": "ko",
+      "theme": "dark",
+      "width": 1440,
+      "zoom": 1.25,
+      "label": "스킬 자동 선택",
+      "hint": "메시지의 주제가 아니라 정확한 이름으로 가져온 스킬 하나를 찾습니다. 명시적으로 선택한 스킬이 항상 우선합니다.",
+      "badge": "자동 선택된 스킬: /literal-skill"
+    },
+    {
+      "language": "tr",
+      "theme": "light",
+      "width": 900,
+      "zoom": 1,
+      "label": "Becerileri otomatik seçin",
+      "hint": "Konuya göre değil, mesajdaki tam adına göre içe aktarılmış tek bir beceriyi eşleştirin. Açık beceri seçimleri her zaman önceliklidir.",
+      "badge": "Otomatik seçilen beceri: /literal-skill"
+    },
+    {
+      "language": "tr",
+      "theme": "light",
+      "width": 900,
+      "zoom": 1.25,
+      "label": "Becerileri otomatik seçin",
+      "hint": "Konuya göre değil, mesajdaki tam adına göre içe aktarılmış tek bir beceriyi eşleştirin. Açık beceri seçimleri her zaman önceliklidir.",
+      "badge": "Otomatik seçilen beceri: /literal-skill"
+    },
+    {
+      "language": "tr",
+      "theme": "light",
+      "width": 1440,
+      "zoom": 1,
+      "label": "Becerileri otomatik seçin",
+      "hint": "Konuya göre değil, mesajdaki tam adına göre içe aktarılmış tek bir beceriyi eşleştirin. Açık beceri seçimleri her zaman önceliklidir.",
+      "badge": "Otomatik seçilen beceri: /literal-skill"
+    },
+    {
+      "language": "tr",
+      "theme": "light",
+      "width": 1440,
+      "zoom": 1.25,
+      "label": "Becerileri otomatik seçin",
+      "hint": "Konuya göre değil, mesajdaki tam adına göre içe aktarılmış tek bir beceriyi eşleştirin. Açık beceri seçimleri her zaman önceliklidir.",
+      "badge": "Otomatik seçilen beceri: /literal-skill"
+    },
+    {
+      "language": "tr",
+      "theme": "dark",
+      "width": 900,
+      "zoom": 1,
+      "label": "Becerileri otomatik seçin",
+      "hint": "Konuya göre değil, mesajdaki tam adına göre içe aktarılmış tek bir beceriyi eşleştirin. Açık beceri seçimleri her zaman önceliklidir.",
+      "badge": "Otomatik seçilen beceri: /literal-skill"
+    },
+    {
+      "language": "tr",
+      "theme": "dark",
+      "width": 900,
+      "zoom": 1.25,
+      "label": "Becerileri otomatik seçin",
+      "hint": "Konuya göre değil, mesajdaki tam adına göre içe aktarılmış tek bir beceriyi eşleştirin. Açık beceri seçimleri her zaman önceliklidir.",
+      "badge": "Otomatik seçilen beceri: /literal-skill"
+    },
+    {
+      "language": "tr",
+      "theme": "dark",
+      "width": 1440,
+      "zoom": 1,
+      "label": "Becerileri otomatik seçin",
+      "hint": "Konuya göre değil, mesajdaki tam adına göre içe aktarılmış tek bir beceriyi eşleştirin. Açık beceri seçimleri her zaman önceliklidir.",
+      "badge": "Otomatik seçilen beceri: /literal-skill"
+    },
+    {
+      "language": "tr",
+      "theme": "dark",
+      "width": 1440,
+      "zoom": 1.25,
+      "label": "Becerileri otomatik seçin",
+      "hint": "Konuya göre değil, mesajdaki tam adına göre içe aktarılmış tek bir beceriyi eşleştirin. Açık beceri seçimleri her zaman önceliklidir.",
+      "badge": "Otomatik seçilen beceri: /literal-skill"
+    },
+    {
+      "language": "vi",
+      "theme": "light",
+      "width": 900,
+      "zoom": 1,
+      "label": "Tự động chọn kỹ năng",
+      "hint": "Khớp một kỹ năng đã nhập theo đúng tên trong tin nhắn, không theo chủ đề. Lựa chọn kỹ năng trực tiếp luôn được ưu tiên.",
+      "badge": "Kỹ năng được tự động chọn: /literal-skill"
+    },
+    {
+      "language": "vi",
+      "theme": "light",
+      "width": 900,
+      "zoom": 1.25,
+      "label": "Tự động chọn kỹ năng",
+      "hint": "Khớp một kỹ năng đã nhập theo đúng tên trong tin nhắn, không theo chủ đề. Lựa chọn kỹ năng trực tiếp luôn được ưu tiên.",
+      "badge": "Kỹ năng được tự động chọn: /literal-skill"
+    },
+    {
+      "language": "vi",
+      "theme": "light",
+      "width": 1440,
+      "zoom": 1,
+      "label": "Tự động chọn kỹ năng",
+      "hint": "Khớp một kỹ năng đã nhập theo đúng tên trong tin nhắn, không theo chủ đề. Lựa chọn kỹ năng trực tiếp luôn được ưu tiên.",
+      "badge": "Kỹ năng được tự động chọn: /literal-skill"
+    },
+    {
+      "language": "vi",
+      "theme": "light",
+      "width": 1440,
+      "zoom": 1.25,
+      "label": "Tự động chọn kỹ năng",
+      "hint": "Khớp một kỹ năng đã nhập theo đúng tên trong tin nhắn, không theo chủ đề. Lựa chọn kỹ năng trực tiếp luôn được ưu tiên.",
+      "badge": "Kỹ năng được tự động chọn: /literal-skill"
+    },
+    {
+      "language": "vi",
+      "theme": "dark",
+      "width": 900,
+      "zoom": 1,
+      "label": "Tự động chọn kỹ năng",
+      "hint": "Khớp một kỹ năng đã nhập theo đúng tên trong tin nhắn, không theo chủ đề. Lựa chọn kỹ năng trực tiếp luôn được ưu tiên.",
+      "badge": "Kỹ năng được tự động chọn: /literal-skill"
+    },
+    {
+      "language": "vi",
+      "theme": "dark",
+      "width": 900,
+      "zoom": 1.25,
+      "label": "Tự động chọn kỹ năng",
+      "hint": "Khớp một kỹ năng đã nhập theo đúng tên trong tin nhắn, không theo chủ đề. Lựa chọn kỹ năng trực tiếp luôn được ưu tiên.",
+      "badge": "Kỹ năng được tự động chọn: /literal-skill"
+    },
+    {
+      "language": "vi",
+      "theme": "dark",
+      "width": 1440,
+      "zoom": 1,
+      "label": "Tự động chọn kỹ năng",
+      "hint": "Khớp một kỹ năng đã nhập theo đúng tên trong tin nhắn, không theo chủ đề. Lựa chọn kỹ năng trực tiếp luôn được ưu tiên.",
+      "badge": "Kỹ năng được tự động chọn: /literal-skill"
+    },
+    {
+      "language": "vi",
+      "theme": "dark",
+      "width": 1440,
+      "zoom": 1.25,
+      "label": "Tự động chọn kỹ năng",
+      "hint": "Khớp một kỹ năng đã nhập theo đúng tên trong tin nhắn, không theo chủ đề. Lựa chọn kỹ năng trực tiếp luôn được ưu tiên.",
+      "badge": "Kỹ năng được tự động chọn: /literal-skill"
+    },
+    {
+      "language": "zh-CN",
+      "theme": "light",
+      "width": 900,
+      "zoom": 1,
+      "label": "自动选择技能",
+      "hint": "按消息中的准确名称匹配一个已导入的技能，而不是根据主题。显式选择的技能始终优先。",
+      "badge": "已自动选择技能：/literal-skill"
+    },
+    {
+      "language": "zh-CN",
+      "theme": "light",
+      "width": 900,
+      "zoom": 1.25,
+      "label": "自动选择技能",
+      "hint": "按消息中的准确名称匹配一个已导入的技能，而不是根据主题。显式选择的技能始终优先。",
+      "badge": "已自动选择技能：/literal-skill"
+    },
+    {
+      "language": "zh-CN",
+      "theme": "light",
+      "width": 1440,
+      "zoom": 1,
+      "label": "自动选择技能",
+      "hint": "按消息中的准确名称匹配一个已导入的技能，而不是根据主题。显式选择的技能始终优先。",
+      "badge": "已自动选择技能：/literal-skill"
+    },
+    {
+      "language": "zh-CN",
+      "theme": "light",
+      "width": 1440,
+      "zoom": 1.25,
+      "label": "自动选择技能",
+      "hint": "按消息中的准确名称匹配一个已导入的技能，而不是根据主题。显式选择的技能始终优先。",
+      "badge": "已自动选择技能：/literal-skill"
+    },
+    {
+      "language": "zh-CN",
+      "theme": "dark",
+      "width": 900,
+      "zoom": 1,
+      "label": "自动选择技能",
+      "hint": "按消息中的准确名称匹配一个已导入的技能，而不是根据主题。显式选择的技能始终优先。",
+      "badge": "已自动选择技能：/literal-skill"
+    },
+    {
+      "language": "zh-CN",
+      "theme": "dark",
+      "width": 900,
+      "zoom": 1.25,
+      "label": "自动选择技能",
+      "hint": "按消息中的准确名称匹配一个已导入的技能，而不是根据主题。显式选择的技能始终优先。",
+      "badge": "已自动选择技能：/literal-skill"
+    },
+    {
+      "language": "zh-CN",
+      "theme": "dark",
+      "width": 1440,
+      "zoom": 1,
+      "label": "自动选择技能",
+      "hint": "按消息中的准确名称匹配一个已导入的技能，而不是根据主题。显式选择的技能始终优先。",
+      "badge": "已自动选择技能：/literal-skill"
+    },
+    {
+      "language": "zh-CN",
+      "theme": "dark",
+      "width": 1440,
+      "zoom": 1.25,
+      "label": "自动选择技能",
+      "hint": "按消息中的准确名称匹配一个已导入的技能，而不是根据主题。显式选择的技能始终优先。",
+      "badge": "已自动选择技能：/literal-skill"
+    },
+    {
+      "language": "zh-TW",
+      "theme": "light",
+      "width": 900,
+      "zoom": 1,
+      "label": "自動選擇技能",
+      "hint": "依訊息中的完整名稱比對一個已匯入的技能，而非依主題選擇。明確選擇的技能永遠優先。",
+      "badge": "已自動選擇技能：/literal-skill"
+    },
+    {
+      "language": "zh-TW",
+      "theme": "light",
+      "width": 900,
+      "zoom": 1.25,
+      "label": "自動選擇技能",
+      "hint": "依訊息中的完整名稱比對一個已匯入的技能，而非依主題選擇。明確選擇的技能永遠優先。",
+      "badge": "已自動選擇技能：/literal-skill"
+    },
+    {
+      "language": "zh-TW",
+      "theme": "light",
+      "width": 1440,
+      "zoom": 1,
+      "label": "自動選擇技能",
+      "hint": "依訊息中的完整名稱比對一個已匯入的技能，而非依主題選擇。明確選擇的技能永遠優先。",
+      "badge": "已自動選擇技能：/literal-skill"
+    },
+    {
+      "language": "zh-TW",
+      "theme": "light",
+      "width": 1440,
+      "zoom": 1.25,
+      "label": "自動選擇技能",
+      "hint": "依訊息中的完整名稱比對一個已匯入的技能，而非依主題選擇。明確選擇的技能永遠優先。",
+      "badge": "已自動選擇技能：/literal-skill"
+    },
+    {
+      "language": "zh-TW",
+      "theme": "dark",
+      "width": 900,
+      "zoom": 1,
+      "label": "自動選擇技能",
+      "hint": "依訊息中的完整名稱比對一個已匯入的技能，而非依主題選擇。明確選擇的技能永遠優先。",
+      "badge": "已自動選擇技能：/literal-skill"
+    },
+    {
+      "language": "zh-TW",
+      "theme": "dark",
+      "width": 900,
+      "zoom": 1.25,
+      "label": "自動選擇技能",
+      "hint": "依訊息中的完整名稱比對一個已匯入的技能，而非依主題選擇。明確選擇的技能永遠優先。",
+      "badge": "已自動選擇技能：/literal-skill"
+    },
+    {
+      "language": "zh-TW",
+      "theme": "dark",
+      "width": 1440,
+      "zoom": 1,
+      "label": "自動選擇技能",
+      "hint": "依訊息中的完整名稱比對一個已匯入的技能，而非依主題選擇。明確選擇的技能永遠優先。",
+      "badge": "已自動選擇技能：/literal-skill"
+    },
+    {
+      "language": "zh-TW",
+      "theme": "dark",
+      "width": 1440,
+      "zoom": 1.25,
+      "label": "自動選擇技能",
+      "hint": "依訊息中的完整名稱比對一個已匯入的技能，而非依主題選擇。明確選擇的技能永遠優先。",
+      "badge": "已自動選擇技能：/literal-skill"
+    }
+  ]
+}
