@@ -28,6 +28,21 @@ import type { Config } from '../src/shared/types.js';
 const recoveryBrowserWake = vi.hoisted(() => vi.fn(async (_url: string, _retry?: boolean, _background?: boolean,
   _authority?: { current(): boolean | Promise<boolean> }) => {}));
 vi.mock('../src/main/browser-startup.js', () => ({ wakeBrowserUrl: recoveryBrowserWake }));
+// Makes the app withhold one queued input from the page, with a reason (2026-10-31).
+const withheldInput = vi.hoisted(() => ({ id: null as string | null, reason: '' }));
+vi.mock('../src/main/session/input.js', async original => {
+  const real = await original<typeof import('../src/main/session/input.js')>();
+  return { ...real, queuedInputOfferBlocker: async (id: string) => id === withheldInput.id ? withheldInput.reason : real.queuedInputOfferBlocker(id) };
+});
+// Holds one chat's observation write open, as a busy multi-agent run does (#1922).
+const heldRecording = vi.hoisted(() => ({ conversationId: null as string | null, release: null as (() => void) | null }));
+vi.mock('../src/main/session/recorder.js', async original => {
+  const real = await original<typeof import('../src/main/session/recorder.js')>();
+  return { ...real, recordChatObservations: async (...args: Parameters<typeof real.recordChatObservations>) => {
+    if (args[0] === heldRecording.conversationId) await new Promise<void>(resolve => { heldRecording.release = resolve; });
+    return real.recordChatObservations(...args);
+  } };
+});
 
 async function recordFinalForTest(conversationId: string, turnId: string): Promise<void> {
   await request('POST', '/events', { body: { conversationId, events: [{ kind: 'assistant_message', time: Date.now(),
@@ -340,11 +355,12 @@ async function waitForOpened(count = 1, timeout?: number): Promise<void> {
 
 async function waitForRevival(): Promise<{ id: string; conversationId: string }> {
   let revival: { id: string; conversationId: string } | null = null;
+  // The release runners (Intel macOS, Linux arm64) are slow: not vi.waitFor's one-second default.
   await vi.waitFor(async () => {
     const status = await request('GET', '/status');
     revival = status.body.revival ?? null;
     expect(revival).toMatchObject({ id: expect.any(String), conversationId: expect.any(String) });
-  });
+  }, { timeout: 10_000, interval: 50 });
   return revival!;
 }
 
@@ -357,7 +373,7 @@ async function waitForRevival(): Promise<{ id: string; conversationId: string }>
 async function redeem(id?: string, client = 'tab-1'): Promise<any> {
   if (!id) {
     const index = anonymousRedeemIndex++;
-    await vi.waitFor(() => expect(opened.length).toBeGreaterThan(index));
+    await vi.waitFor(() => expect(opened.length).toBeGreaterThan(index), { timeout: 10_000, interval: 20 });
     id = new URL(opened[index]!).searchParams.get('clf')!;
   }
   const reply = await request('POST', '/commands/redeem', { body: { id, client } });
@@ -426,6 +442,55 @@ beforeEach(async () => {
   await flushDurable();
   await setSecret('bridgeToken', '');
   token = null;
+});
+
+describe('lost first-message opening', () => {
+  const browser = 'openingownerbrowser1234', other = 'otheropeningbrowser1234';
+  let input: typeof import('../src/main/session/input.js');
+  beforeEach(async () => {
+    input = await import('../src/main/session/input.js');
+    input.resetInputForTests();
+    await writeDurableNow('session-input', []);
+  });
+  afterEach(async () => {
+    input.resetInputForTests();
+    await writeDurableNow('session-input', []);
+  });
+  it.each(['unclaimed', 'other-browser', 'missing-browser', 'no-handout', 'claimed', 'authorized'])(
+    'accepts a missing-tab report only from its holder before any claim (%s)', async phase => {
+      await pair();
+      const row = await input.enqueueInput({ id: randomUUID(), sessionId: null, text: 'Opening task',
+        mode: 'auto', dueAt: Date.now(), model: null, reasoningEffort: null });
+      if (phase !== 'no-handout') {
+        const status = await request('POST', '/status', { browser, body: { openConversations: [] } });
+        expect(status.body.inputs).toContainEqual({ id: row.id, conversationId: null });
+      }
+      if (phase === 'claimed' || phase === 'authorized')
+        expect(await input.claimBrowserInput(row.id, '7:document:0', null, true)).not.toBeNull();
+      if (phase === 'authorized') expect(await input.authorizeBrowserInput(row.id, '7:document:0', null)).toBe(true);
+      const before = await input.listInputs();
+      const reply = await request('POST', '/input/opening-unavailable', {
+        ...(phase === 'missing-browser' ? {} : { browser: phase === 'other-browser' ? other : browser }),
+        body: { id: row.id, tab: 7, stage: 'ready' }
+      });
+      if (phase === 'unclaimed') {
+        expect(reply.body).toEqual({ ok: true });
+        expect((await input.listInputs()).find(entry => entry.id === row.id)).toMatchObject({ state: 'failed' });
+        expect(await input.pendingBrowserInputs()).toEqual([]);
+        expect(await input.claimBrowserInput(row.id, '7:late-document:0', null, true)).toBeNull();
+      } else {
+        expect(reply.status).toBe(['claimed', 'authorized'].includes(phase) ? 200 : 409);
+        expect(reply.body.ok).not.toBe(true);
+        expect(await input.listInputs()).toEqual(before);
+      }
+    });
+  it.each([{ tab: null, stage: 'opening' }, { tab: 7.5, stage: 'ready' }, { tab: 7, stage: 'sent' }])(
+    'refuses an invalid opening report %j', async report => {
+      await pair();
+      expect((await request('POST', '/input/opening-unavailable', {
+        browser, body: { id: randomUUID(), ...report }
+      })).status).toBe(400);
+    });
 });
 
 // ------------------------------------------------------------------ origin
@@ -541,6 +606,37 @@ describe('direct browser control over the paired bridge', () => {
 });
 
 describe('who is allowed to talk to it', () => {
+  // 2026-10-30: an extension that kept Chrome's language for weeks said nothing anywhere.
+  it('logs once when the extension\'s stored language is not the app\'s, with its last error', async () => {
+    await pair();
+    const logger = await import('../src/main/logger.js');
+    const warn = vi.spyOn(logger, 'logWarn');
+    await saveConfig({ ...getConfig(), ui: { ...getConfig().ui, language: 'en' } });
+    const report = (language: unknown) => request('POST', '/diagnostics', { body: { capturedAt: Date.now(), status: { connected: true, paired: true },
+      preferences: { overwrite: true, durations: false }, language } });
+    const lines = () => warn.mock.calls.map(([line]) => String(line)).filter(line => line.includes("the extension's stored language"));
+    await report({ applied: 'en', stored: 'en', error: null });
+    expect(lines()).toEqual([]);
+    await report({ applied: null, stored: null, error: 'storage read did not answer within 5 s' });
+    await report({ applied: null, stored: null, error: 'storage read did not answer within 5 s' });
+    await report({ applied: 'en', stored: 'de', error: null });
+    expect(lines()).toEqual([
+      "browser: the extension's stored language is none (it uses the browser's), the app's is en; last attempt: storage read did not answer within 5 s",
+      "browser: the extension's stored language is de, the app's is en"]);
+    // An older extension reports no language: nothing to say.
+    await report(undefined);
+    expect(lines()).toHaveLength(2);
+    // The app's language changing is a new mismatch (CodeRabbit on #1940) ...
+    await saveConfig({ ...getConfig(), ui: { ...getConfig().ui, language: 'fr' } });
+    await report({ applied: 'en', stored: 'de', error: null });
+    expect(lines().at(-1)).toBe("browser: the extension's stored language is de, the app's is fr");
+    // ... and once they match, the same mismatch coming back is said again.
+    await report({ applied: 'fr', stored: 'fr', error: null });
+    await report({ applied: 'en', stored: 'de', error: null });
+    expect(lines()).toHaveLength(4);
+    warn.mockRestore();
+  });
+
   // A chat tab the extension reloaded off Chrome's error page says so in the app's log, once (2.1.47 round).
   it('logs the extension\'s error-page reloads once each', async () => {
     await pair();
@@ -1821,6 +1917,66 @@ describe('activity feed', () => {
     }
   });
 
+  // #1960 (scuan2, reproduced on v2.1.49): with the built-in browser chosen, a repair for a chat that
+  // ordinary Chrome still holds went only to Chrome, whose claim is refused; the chosen browser never
+  // got it, and the chat sat. The chosen built-in browser takes a repair over, as it does inputs (#1516).
+  it('hands a repair for a chat an unchosen browser holds to the chosen built-in browser', async () => {
+    await pair();
+    const chrome = 'c'.repeat(32), builtIn = 'd'.repeat(32);
+    const before = getConfig().ui.chatBrowser;
+    try {
+      await saveConfig({ ...getConfig(), ui: { ...getConfig().ui, chatBrowser: 'cos' } });
+      const conversationId = randomUUID();
+      const session = await createSession({ conversationId });
+      const status = (browser: string, host: string, open: string[]) =>
+        request('POST', '/status', { body: { openConversations: open }, browser, host });
+      // The built-in browser is present; Chrome has the chat open.
+      await status(builtIn, 'cos', []);
+      await status(chrome, 'browser', [conversationId]);
+      await compactSession(session.id);
+      const fromChrome = ((await status(chrome, 'browser', [conversationId])).body.repairs ?? [])
+        .find((row: { conversationId: string }) => row.conversationId === conversationId);
+      // Chrome, not chosen, is handed no token it could not claim (CodeRabbit on #1963).
+      expect(fromChrome).toBeUndefined();
+      const fromBuiltIn = ((await status(builtIn, 'cos', [])).body.repairs ?? [])
+        .find((row: { conversationId: string }) => row.conversationId === conversationId);
+      expect(fromBuiltIn).toMatchObject({ reason: 'compaction' });
+      expect((await request('POST', '/repairs/claim', { body: { token: fromBuiltIn.token }, browser: builtIn, host: 'cos' })).body.allowed).toBe(true);
+    } finally {
+      await saveConfig({ ...getConfig(), ui: { ...getConfig().ui, chatBrowser: before } });
+    }
+  });
+
+  // CodeRabbit on #1963: with "browser only", the chosen built-in browser may not open the chat Chrome
+  // holds. It is not handed the repair (which it would skip unclaimed, spending the no-page budget on an
+  // open chat); the repair waits, said once, and Chrome's refused claim is logged.
+  it('keeps a repair waiting rather than spending it when browser only keeps the chosen browser from opening the chat', async () => {
+    await pair();
+    const chrome = 'c'.repeat(32), builtIn = 'd'.repeat(32);
+    const before = getConfig().ui;
+    try {
+      await saveConfig({ ...getConfig(), ui: { ...getConfig().ui, chatBrowser: 'cos', browserOnly: true } });
+      const conversationId = randomUUID();
+      const session = await createSession({ conversationId });
+      const status = (browser: string, host: string, open: string[]) =>
+        request('POST', '/status', { body: { openConversations: open }, browser, host });
+      await status(builtIn, 'cos', []);
+      await status(chrome, 'browser', [conversationId]);
+      await compactSession(session.id);
+      for (let pass = 0; pass < 15; pass++) {
+        expect(((await status(builtIn, 'cos', [])).body.repairs ?? []).some((row: { conversationId: string }) => row.conversationId === conversationId)).toBe(false);
+        await status(chrome, 'browser', [conversationId]);
+      }
+      const waits = getLog().filter(entry => entry.message.includes(`repair for ${conversationId} waits: another browser holds this chat, and "browser only"`));
+      expect(waits).toHaveLength(1);
+      // Never declared pageless: the chat is open in Chrome. Once browser only is off, the chosen browser takes it.
+      await saveConfig({ ...getConfig(), ui: { ...getConfig().ui, browserOnly: false } });
+      expect(((await status(builtIn, 'cos', [])).body.repairs ?? []).find((row: { conversationId: string }) => row.conversationId === conversationId)).toMatchObject({ reason: 'compaction' });
+    } finally {
+      await saveConfig({ ...getConfig(), ui: before });
+    }
+  });
+
   it('gives new work only to the built-in browser while it is the chosen one and present (#1516)', async () => {
     // 2026-10-15: with the built-in browser chosen and Chrome with the extension still open, every
     // new chat opened a tab in Chrome. Chrome keeps recording what the person opens there.
@@ -2897,6 +3053,56 @@ describe('automatic compaction', () => {
       [conversationId, 'Reloaded chat to send the handoff request for Compact & resume.']
     ]);
   });
+
+  // #1922 (scuan2): a page that tries to claim a repair and is refused for the moment is a page. Its
+  // refusals must not use up the "never claimed … no page" budget, and each refusal says why. Nor do
+  // the polls of a browser that may not claim it (CodeRabbit on #1953): with the built-in browser
+  // chosen, Chrome still sees the chat but its polls are not offers anyone could take.
+  it.each(['one browser', 'a second, unchosen browser polling too', 'a second eligible browser polling without claiming'] as const)(
+    'keeps offering a repair whose page keeps trying to claim it, and logs why each claim was refused (%s)', async variant => {
+      await pair();
+      const builtIn = 'd'.repeat(32), chrome = 'c'.repeat(32);
+      const before = getConfig().ui.chatBrowser;
+      const conversationId = randomUUID();
+      // Another chat keeps saving its events meanwhile, so each claim is refused for the moment.
+      const other = randomUUID();
+      heldRecording.conversationId = other;
+      let busy: Promise<unknown> | null = null;
+      try {
+        const unchosen = variant === 'a second, unchosen browser polling too';
+        if (unchosen) await saveConfig({ ...getConfig(), ui: { ...getConfig().ui, chatBrowser: 'cos' } });
+        const asker: Record<string, string> = unchosen ? { browser: builtIn, host: 'cos' } : variant === 'one browser' ? {} : { browser: 'a'.repeat(32), host: 'browser' };
+        const bystander: Record<string, string> = unchosen ? { browser: chrome, host: 'browser' } : { browser: 'b'.repeat(32), host: 'browser' };
+        const session = await createSession({ conversationId });
+        await compactSession(session.id);
+        const offered = async (who: Record<string, string> = asker) => ((await request('POST', '/status', { body: { openConversations: [conversationId] }, ...who })).body.repairs ?? [])
+          .find((row: { conversationId: string }) => row.conversationId === conversationId);
+        expect(await offered()).toMatchObject({ reason: 'compaction' });
+        busy = request('POST', '/events', { body: { conversationId: other, events: [{ kind: 'progress', time: Date.now(), turnId: 'other-turn', text: 'Working' }] } });
+        await vi.waitFor(() => expect(heldRecording.release).not.toBeNull(), { timeout: 10_000 });
+        let tries = 0;
+        for (let pass = 0; pass < 14; pass++) {
+          if (variant !== 'one browser') await offered(bystander);
+          const handout = await offered();
+          if (!handout) break;
+          tries += 1;
+          expect((await request('POST', '/repairs/claim', { body: { token: handout.token }, ...asker })).body.allowed).toBe(false);
+        }
+        expect(tries).toBe(14);
+        expect(getLog().some(entry => entry.message.includes(`${conversationId} never claimed`))).toBe(false);
+        // Said once a minute per chat and reason, not once per refusal.
+        expect(getLog().filter(entry => entry.message.includes(`refused the compaction repair claim for ${conversationId}: a chat was still saving its events`))).toHaveLength(1);
+        heldRecording.release!(); heldRecording.conversationId = null; heldRecording.release = null;
+        await busy; busy = null;
+        // Once the write is done, the same repair is claimed.
+        expect((await request('POST', '/repairs/claim', { body: { token: (await offered()).token }, ...asker })).body.allowed).toBe(true);
+      } finally {
+        // Never leave the write open: later claims in this file would all be refused.
+        heldRecording.release?.(); heldRecording.conversationId = null; heldRecording.release = null;
+        await busy?.catch(() => undefined);
+        await saveConfig({ ...getConfig(), ui: { ...getConfig().ui, chatBrowser: before } });
+      }
+    });
 
   it('hands out an explicitly requested Compact & resume for a chat whose tab the user closed', async () => {
     // 2026-09-30, live on 2.1.22: the test chat's tab had been closed, so its automatic recovery
@@ -5778,6 +5984,29 @@ describe('delivering a bootstrap', () => {
    * names the same id back, and the browser has to say which conversation it typed into
    * before the broker will believe the worker is awake.
    */
+  // #1952: a worker opened on GPT-5.6 high went on in GPT-6 medium, because its wake was typed
+  // without choosing a model. The wake carries the worker's own model and effort.
+  it('asks the page to choose the worker\'s own model and effort before typing its wake', async () => {
+    await pair();
+    spawn({ workers: [{ task: 'write the audit', model: 'gpt-5-6', reasoning_effort: 'high' }], caller: { conversationId: PRIME_CHAT } });
+    const bootstrap = await redeem();
+    expect(bootstrap).toMatchObject({ model: 'gpt-5-6', reasoningEffort: 'high' });
+    const conversationId = 'cafecafe-7654-3210-fedc-ba98765432a1';
+    await request('POST', '/commands/ack', { body: { id: bootstrap.id, status: 'sent', conversationId, agent: 'worker-1' } });
+    finishAgent({ conversationId }, 'the first half is done');
+    wake([{ to: 'worker-1', text: 'now do the second half' }]);
+    const revival = await waitForRevival();
+    const claimed = await request('POST', '/commands/redeem', { body: { id: revival.id, client: 'tab-wake-model', conversationId } });
+    expect(claimed.body.command).toMatchObject({ type: 'revive', model: 'gpt-5-6', reasoningEffort: 'high' });
+    // Another page cannot report it: only the page that redeemed the wake speaks for it.
+    const foreign = await request('POST', '/commands/step', { body: { id: revival.id, client: 'tab-someone-else', step: 'model-unconfirmed' } });
+    expect(foreign.body.ok).not.toBe(true);
+    expect(getLog().some(entry => entry.message.includes(`worker-1's wake in ${conversationId} goes out on ChatGPT's current model`))).toBe(false);
+    // The picker could not confirm it: the wake goes out anyway, and the app says on what.
+    expect((await request('POST', '/commands/step', { body: { id: revival.id, client: 'tab-wake-model', step: 'model-unconfirmed' } })).body).toEqual({ ok: true });
+    expect(getLog().some(entry => entry.message.includes(`worker-1's wake in ${conversationId} goes out on ChatGPT's current model: gpt-5-6 high could not be confirmed`))).toBe(true);
+  });
+
   it("routes revival to the worker's own chat without opening a duplicate, and treats the typed message as an offer", async () => {
     await pair();
     spawn({ workers: [{ task: 'write the audit' }], caller: { conversationId: PRIME_CHAT } });
@@ -16384,8 +16613,88 @@ describe('the goal loop over the bridge', () => {
     } finally { vi.useRealTimers(); }
   });
 
+  // 2026-10-31: an automatic Continue the app itself withheld was "uncollected"; the pickup reloaded the
+  // chat three times for it, stopped, and nothing said which gate held it. A page cannot claim what is
+  // not offered, so no reload is spent, and the log names the gate.
+  it('spends no reload on a queued message the app does not offer, and says which gate holds it', async () => {
+    vi.useFakeTimers();
+    const input = await import('../src/main/session/input.js');
+    const { resetInputForTests, enqueueInput } = input;
+    resetInputForTests();
+    const id = 'abca0176-0000-4000-8000-000000000176';
+    try {
+      await writeDurableNow('session-input', []);
+      await pair();
+      const chat = 'cafe0176-0000-4000-8000-000000000176';
+      await request('POST', '/events', { body: { conversationId: chat, events: [
+        { kind: 'user_message', time: Date.now(), text: 'work', messageId: 'withheld-user' },
+        { kind: 'turn_start', time: Date.now(), turnId: 'withheld-turn' }
+      ] } });
+      const session = (await findSessionByConversation(chat, { requireUnique: true }))!;
+      await enqueueInput({ id, sessionId: session.id, text: 'next step', mode: 'after-turn', dueAt: Date.now(), model: null, reasoningEffort: null });
+      await vi.advanceTimersByTimeAsync(1);
+      await request('POST', '/events', { body: { conversationId: chat, events: [
+        { kind: 'turn_end', time: Date.now(), turnId: 'withheld-turn', outcome: 'completed' }
+      ] } });
+      await recordFinalForTest(chat, 'withheld-turn');
+      withheldInput.id = id; withheldInput.reason = 'an earlier queued message of this chat (x) goes first';
+      for (const minutes of [2, 5, 10]) {
+        await vi.advanceTimersByTimeAsync(minutes * 60_000);
+        await sweepStaleSwarm(Date.now());
+        expect((await request('GET', '/status')).body.repairs?.some((repair: { conversationId: string }) => repair.conversationId === chat) ?? false).toBe(false);
+      }
+      expect(getLog().filter(entry => entry.message.includes(`next automation/input step in ${chat} is not offered to the page`)).map(entry => entry.message)).toEqual([
+        `bridge: next automation/input step in ${chat} is not offered to the page — an earlier queued message of this chat (x) goes first; no reload is spent on it`
+      ]);
+      expect((await input.listInputs()).find(entry => entry.id === id)?.pickupRecovery).toBeUndefined();
+      // Once the gate opens, the ordinary pickup schedule takes over again.
+      withheldInput.id = null;
+      await vi.advanceTimersByTimeAsync(2 * 60_000);
+      await sweepStaleSwarm(Date.now());
+      expect((await request('GET', '/status')).body.repairs?.[0]).toMatchObject({ conversationId: chat, reason: 'goal' });
+    } finally {
+      withheldInput.id = null;
+      await writeDurableNow('session-input', []);
+      resetInputForTests();
+      vi.useRealTimers();
+    }
+  });
+
+  it('names the gate that holds a queued message from the page, and none for one it offers', async () => {
+    const input = await import('../src/main/session/input.js');
+    const { resetInputForTests, enqueueInput, claimBrowserInput, queuedInputOfferBlocker } = input;
+    resetInputForTests();
+    try {
+      await writeDurableNow('session-input', []);
+      await pair();
+      const chat = 'cafe0177-0000-4000-8000-000000000177';
+      await request('POST', '/events', { body: { conversationId: chat, events: [
+        { kind: 'user_message', time: Date.now(), text: 'work', messageId: 'gate-user' },
+        { kind: 'turn_start', time: Date.now(), turnId: 'gate-turn' }
+      ] } });
+      const session = (await findSessionByConversation(chat, { requireUnique: true }))!;
+      const first = 'abca0177-0000-4000-8000-000000000001', second = 'abca0177-0000-4000-8000-000000000002', later = 'abca0177-0000-4000-8000-000000000003';
+      for (const id of [first, second]) await enqueueInput({ id, sessionId: session.id, text: id, mode: 'after-turn', dueAt: Date.now(), model: null, reasoningEffort: null });
+      await enqueueInput({ id: later, sessionId: session.id, text: 'later', mode: 'after-turn', dueAt: Date.now() + 60 * 60_000, model: null, reasoningEffort: null });
+      expect(await queuedInputOfferBlocker(first)).toBe("its chat's turn is still running");
+      await request('POST', '/events', { body: { conversationId: chat, events: [
+        { kind: 'turn_end', time: Date.now(), turnId: 'gate-turn', outcome: 'completed' }
+      ] } });
+      await recordFinalForTest(chat, 'gate-turn');
+      expect(await queuedInputOfferBlocker(first)).toBeNull();
+      expect(await queuedInputOfferBlocker(second)).toBe(`an earlier queued message of this chat (${first}) goes first`);
+      expect(await queuedInputOfferBlocker(later)).toBe('it is not due yet');
+      expect(await claimBrowserInput(first, 'page-owner', chat)).toBeTruthy();
+      expect(await queuedInputOfferBlocker(second)).toBe(`another message of this chat (${first}) is still being sent`);
+      expect(await queuedInputOfferBlocker(first)).toBe('it is no longer queued');
+    } finally {
+      await writeDurableNow('session-input', []);
+      resetInputForTests();
+    }
+  });
+
   /** A missing page pickup gets a durable, visible stop instead of an endless reload loop. */
-  it('stops queued pickup after three persisted reload attempts and preserves the original input', async () => {
+  it('shows queued pickup as stopped after three reloads, keeps retrying every 15 to 60 minutes, and preserves the original input', async () => {
     vi.useFakeTimers();
     const input = await import('../src/main/session/input.js');
     const { resetInputForTests, enqueueInput } = input;
@@ -16422,7 +16731,8 @@ describe('the goal loop over the bridge', () => {
       await request('GET', `/status?repaired=${third.token}&repairAction=reloaded`);
 
       const row = (await input.listInputs()).find(entry => entry.id === 'abca0175-0000-4000-8000-000000000175');
-      expect(row).toMatchObject({ text: 'next step', state: 'queued', pickupRecovery: { attempts: 3, stoppedAt: Date.now() } });
+      // Shown as stopped (the person can Continue it in one click), with the first slow retry in 15 minutes.
+      expect(row).toMatchObject({ text: 'next step', state: 'queued', pickupRecovery: { attempts: 3, stoppedAt: Date.now(), nextAt: Date.now() + 15 * 60_000 } });
       expect((await sessionControlsFor(session.id)).recovery).toContainEqual({
         kind: 'pickup-stopped', deadline: Date.now(), attempts: 3, next: 'queue'
       });
@@ -16443,20 +16753,30 @@ describe('the goal loop over the bridge', () => {
       });
 
       // Dropping in-memory bridge/input state models a restart. Durable ownership restores the
-      // stopped state, so another sweep cannot reset the budget or reload this page again.
+      // stopped state and its slow schedule: the budget is not reset, and the chat is not given up.
       resetBridgeForTests();
       resetInputForTests();
       await pair();
       expect((await input.listInputs()).find(entry => entry.id === row!.id)).toMatchObject({
-        text: 'next step', pickupRecovery: { attempts: 3, stoppedAt: Date.now() }
+        text: 'next step', pickupRecovery: { attempts: 3, stoppedAt: Date.now(), nextAt: Date.now() + 15 * 60_000 }
       });
-      await vi.advanceTimersByTimeAsync(15 * 60_000);
-      await sweepStaleSwarm(Date.now());
-      await vi.advanceTimersByTimeAsync(60 * 60_000);
+      // Nothing before the slow retry is due.
+      await vi.advanceTimersByTimeAsync(14 * 60_000);
       await sweepStaleSwarm(Date.now());
       expect((await request('GET', '/status')).body.repairs?.some((repair: { conversationId: string }) => repair.conversationId === chat)).toBe(false);
-      expect((await sessionControlsFor(session.id)).recovery).toContainEqual(expect.objectContaining({ kind: 'pickup-stopped', attempts: 3, next: 'queue' }));
-      expect(recoveryBrowserWake).toHaveBeenCalledTimes(3);
+      // The slow retry after 15 minutes, then the next after 30 more.
+      for (const [minutes, attempts] of [[1, 4], [30, 5]] as const) {
+        await vi.advanceTimersByTimeAsync(minutes * 60_000);
+        await sweepStaleSwarm(Date.now());
+        const slow = (await request('GET', '/status')).body.repairs?.find((repair: { conversationId: string }) => repair.conversationId === chat);
+        expect(slow).toMatchObject({ reason: 'goal' });
+        await request('GET', `/status?repaired=${slow.token}&repairAction=reloaded`);
+        expect((await input.listInputs()).find(entry => entry.id === row!.id)?.pickupRecovery).toMatchObject({ attempts, stoppedAt });
+        expect(getLog().some(entry => entry.message.includes(`uncollected in ${chat} — reload ${attempts} (slow retry)`))).toBe(true);
+      }
+      expect(recoveryBrowserWake).toHaveBeenCalledTimes(5);
+      expect(getLog().filter(entry => entry.message.includes(`has not collected the step in ${chat} after 3 reloads; the chat shows as stopped, and the app keeps trying`))).toHaveLength(1);
+      expect((await sessionControlsFor(session.id)).recovery).toContainEqual(expect.objectContaining({ kind: 'pickup-stopped', next: 'queue' }));
       expect((await readSessionList({ limit: 60 })).recoveryStopped).toEqual([chat]);
       // The person acting on it ends it: the countdown and the list agree it is gone.
       expect(await input.cancelInput(row!.id)).toBe(true);
@@ -16465,6 +16785,58 @@ describe('the goal loop over the bridge', () => {
     } finally {
       await writeDurableNow('session-input', []);
       resetInputForTests();
+      vi.useRealTimers();
+    }
+  });
+
+  // CodeRabbit on #1971: the page asking pushes a stopped pickup's slow retry out, and a restart
+  // keeps the later deadline instead of reloading the chat by the earlier one.
+  it('keeps a slow retry postponed by page activity across a restart', async () => {
+    vi.useFakeTimers();
+    const input = await import('../src/main/session/input.js');
+    input.resetInputForTests();
+    try {
+      await writeDurableNow('session-input', []);
+      await pair();
+      const chat = 'cafe0176-0000-4000-8000-000000000176';
+      await request('POST', '/events', { body: { conversationId: chat, events: [
+        { kind: 'user_message', time: Date.now(), text: 'work', messageId: 'postponed-user' },
+        { kind: 'turn_start', time: Date.now(), turnId: 'postponed-turn' }
+      ] } });
+      const session = (await findSessionByConversation(chat, { requireUnique: true }))!;
+      const id = 'abca0176-0000-4000-8000-000000000176';
+      await input.enqueueInput({ id, sessionId: session.id, text: 'next step', mode: 'after-turn', dueAt: Date.now(), model: null, reasoningEffort: null });
+      await vi.advanceTimersByTimeAsync(1);
+      await request('POST', '/events', { body: { conversationId: chat, events: [
+        { kind: 'turn_end', time: Date.now(), turnId: 'postponed-turn', outcome: 'completed' }
+      ] } });
+      await recordFinalForTest(chat, 'postponed-turn');
+      for (const minutes of [2, 5, 10]) {
+        await vi.advanceTimersByTimeAsync(minutes * 60_000);
+        await sweepStaleSwarm(Date.now());
+        const repair = (await request('GET', '/status')).body.repairs?.find((item: { conversationId: string }) => item.conversationId === chat);
+        await request('GET', `/status?repaired=${repair.token}&repairAction=reloaded`);
+      }
+      const stoppedAt = Date.now();
+      expect((await input.listInputs()).find(row => row.id === id)?.pickupRecovery).toMatchObject({ attempts: 3, nextAt: stoppedAt + 15 * 60_000 });
+      // Five minutes later the page asks: the slow retry moves to 15 minutes from now, and is saved.
+      await vi.advanceTimersByTimeAsync(5 * 60_000);
+      await request('POST', '/goal/draft', { body: { conversationId: chat } });
+      await vi.waitFor(async () => expect((await input.listInputs()).find(row => row.id === id)?.pickupRecovery)
+        .toMatchObject({ attempts: 3, stoppedAt, nextAt: stoppedAt + 20 * 60_000 }), { timeout: 10_000, interval: 50 });
+      resetBridgeForTests();
+      input.resetInputForTests();
+      await pair();
+      // Where the old deadline was: nothing.
+      await vi.advanceTimersByTimeAsync(11 * 60_000);
+      await sweepStaleSwarm(Date.now());
+      expect((await request('GET', '/status')).body.repairs?.some((item: { conversationId: string }) => item.conversationId === chat)).toBe(false);
+      await vi.advanceTimersByTimeAsync(5 * 60_000);
+      await sweepStaleSwarm(Date.now());
+      expect((await request('GET', '/status')).body.repairs?.some((item: { conversationId: string }) => item.conversationId === chat)).toBe(true);
+    } finally {
+      await writeDurableNow('session-input', []);
+      input.resetInputForTests();
       vi.useRealTimers();
     }
   });
@@ -16559,10 +16931,15 @@ describe('the goal loop over the bridge', () => {
         expect(goal.goalPendingReplyFor(chat)).toMatchObject({ pickupAttempts: index + 1 });
         if (index === 0) expect(await input.cancelInput(row.id)).toBe(true);
       }
-      expect(goal.goalPendingReplyFor(chat)).toMatchObject({ pickupAttempts: 3, pickupStoppedAt: Date.now() });
+      const stoppedAt = Date.now();
+      expect(goal.goalPendingReplyFor(chat)).toMatchObject({ pickupAttempts: 3, pickupStoppedAt: stoppedAt });
+      // Shown as stopped, but not given up: the shared budget's slow retry comes 15 minutes later.
       await vi.advanceTimersByTimeAsync(15 * 60_000);
       await sweepStaleSwarm(Date.now());
-      expect((await request('GET', '/status')).body.repairs?.some((item: { conversationId: string }) => item.conversationId === chat)).toBe(false);
+      const slow = (await request('GET', '/status')).body.repairs?.find((item: { conversationId: string }) => item.conversationId === chat);
+      expect(slow).toMatchObject({ reason: 'goal' });
+      await request('GET', `/status?repaired=${slow.token}&repairAction=reloaded`);
+      expect(goal.goalPendingReplyFor(chat)).toMatchObject({ pickupAttempts: 4, pickupStoppedAt: stoppedAt });
     } finally {
       await writeDurableNow('session-input', []);
       input.resetInputForTests();
@@ -16663,12 +17040,17 @@ describe('the goal loop over the bridge', () => {
       }
       const stopped = (await listInputs()).find(item => item.id === id);
       expect(stopped).toMatchObject({ text: 'next step', pickupRecovery: { attempts: 3, stoppedAt: Date.now() } });
+      // Shown as stopped; the slow retry still comes, 15 minutes later.
       await vi.advanceTimersByTimeAsync(15 * 60_000);
       await sweepStaleSwarm(Date.now());
-      expect((await request('GET', '/status')).body.repairs).toEqual([]);
+      expect((await request('GET', '/status')).body.repairs).toEqual([expect.objectContaining({ conversationId: chat, reason: 'goal' })]);
+      // Still retrying: the chat says so, not that it stopped.
+      expect((await sessionControlsFor(session!.id)).recovery?.find(entry => entry.kind === 'pickup-stopped')).not.toHaveProperty('exhausted');
+      // The pickup's 12-hour window still bounds it, and then the chat says it has stopped (#1971).
       await vi.advanceTimersByTimeAsync(12 * 60 * 60_000);
       await sweepStaleSwarm(Date.now());
       expect((await request('GET', '/status')).body.repairs).toEqual([]);
+      expect((await sessionControlsFor(session!.id)).recovery?.find(entry => entry.kind === 'pickup-stopped')).toMatchObject({ exhausted: true });
       expect(await cancelInput(id)).toBe(true);
     } finally {
       await writeDurableNow('session-input', []);
@@ -16797,8 +17179,9 @@ describe('the goal loop over the bridge', () => {
       goal.restoreGoalReplies(stoppedSnapshot);
       goal.restoreGoalSwitches(switchSnapshot);
       await pair();
+      // Restored as stopped, and still retried on the slow cadence.
       await vi.advanceTimersByTimeAsync(60 * 60_000);
-      expect(await takeRepair()).toBeNull();
+      expect(await takeRepair()).toMatchObject({ reason: 'goal' });
 
       // The existing durable expiry still bounds unattended browser recovery.
       await vi.advanceTimersByTimeAsync(12 * 60 * 60_000);
