@@ -1,4 +1,8 @@
 {
+  "Web Local (read-only)": "Web Local（只读）",
+  "Open a browser view of this CoS instance on this computer. No actions or remote access.": "在此计算机上使用浏览器查看这个 CoS 实例。不能执行操作或远程访问。",
+  "Open Web Local": "打开 Web Local",
+  "Could not open Web Local": "无法打开 Web Local",
   "Long chats that get through ChatGPT's limits, pop-ups out of the way, and message times.": "长对话能挺过 ChatGPT 的限制，弹窗不再挡路，还有消息时间。",
   "Long chats keep going": "长对话继续进行",
   "When ChatGPT limits a long chat's history, the app waits instead of reloading it.": "ChatGPT 限制长对话的历史记录时，应用会等待，而不是重新加载。",

@@ -12,6 +12,7 @@ import { MAX_TASK_REQUEST_CHARS } from '../shared/task-progress.js';
 import { restoreCheckpoint } from './checkpoints/index.js';
 import { applyLoginStartup, supportsLoginStartup } from './window-lifecycle.js';
 import { startControlApi, stopControlApi } from './control-api.js';
+import { openWebLocal } from './web-local/index.js';
 import { appearanceSchema } from './appearance-schema.js';
 import { mergeAppearance } from '../shared/appearance.js';
 import { prepareSessionPrompt, prepareSkillFollowup } from './session/prompt.js';
@@ -736,6 +737,21 @@ export async function openSessionChat(id: string): Promise<void> {
 }
 
 export function registerIpc(getWindow: () => BrowserWindow | null, quitToInstall: () => void): void {
+  // A browser activation is issued only for the actual Desktop main frame.
+  // Never expose a ticket or accept a caller-supplied URL over IPC.
+  ipcMain.handle('webLocal:open', async (event, payload: unknown) => {
+    const owner = getWindow();
+    if (payload !== undefined || !owner || owner.isDestroyed() ||
+        owner.webContents.isDestroyed() || event.sender !== owner.webContents ||
+        event.senderFrame !== owner.webContents.mainFrame) {
+      return { ok: false as const, error: 'Could not open Web Local' };
+    }
+    try {
+      return { ok: true as const, data: await openWebLocal(url => shell.openExternal(url)) };
+    } catch {
+      return { ok: false as const, error: 'Could not open Web Local' };
+    }
+  });
   registerWorkspaceTerminalIpc(getWindow);
   registerDictationIpc(getWindow);
   // A session row remains visible until its delete IPC resolves. Fence Trust while deletion is
