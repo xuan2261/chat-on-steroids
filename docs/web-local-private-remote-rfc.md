@@ -4,6 +4,147 @@ Status: **Design proposal for discussion. No implementation in this PR.**
 
 Tracks: #1956. Related: #1934, #1932, #1324, #482, #1794, #1148.
 
+## M0 design-review gate — local, read-only first
+
+**Decision from #1956:** Haz and the maintainer review this short M0 contract
+**before** any Web Local code is proposed. M1 is then split into small,
+separately tested, read-only PRs from fresh `main`. M2 commands, mobile
+remote control, Tailscale, remote Allow, and sensitive file/terminal operations
+are **not authorized by this design**. Phone notifications/status remain with
+#1934, not an early Web Local deliverable.
+
+The source references in this section were checked against `upstream/main`
+`2fdc777d16f4997f129522f31966dba596cacf68` (31 October 2026). They
+identify existing owners and risks, **not** a claim that the proposed Web
+interface or any new pure accessor exists.
+
+### 1. Internal query/command seam
+
+Use a narrow, **internal** typed interface in Electron main, backed by the
+existing CoS service owner for each operation:
+
+```text
+native Desktop IPC ----------> existing CoS owner services
+                                     ^
+browser GET / SSE -> guarded Web query adapter -> explicit read-only projection
+                                     |
+                              no command route in M0/M1
+```
+
+The Web adapter owns only HTTP/session checks, request admission, exact route
+matching, response projection and stream lifecycle. The **store** owns
+session/history consistency; **projects** owns project catalog reads;
+**agents** owns worker-state reads; **chat-models** owns the catalog.
+No generic `ipcRenderer` bridge, direct renderer import, arbitrary Control
+API proxy, new state database, or independently authoritative controller.
+
+M0 records the **future** distinction between `query` (no durable writes,
+recovery, queue commits, browser wake, worker transitions or unsolicited
+network calls) and `command` (explicit per-operation identity, authority,
+receipt and errors). The **command** side is a *reserved interface concept*,
+not a browser route, permission grant or M1 implementation. Do not build a
+generic broker for hypothetical commands before a later approved M2 design.
+One-time ticket consumption is an **authentication transition**, not a
+business-data GET and not a precedent for mutating reads.
+
+### 2. M1 read ownership and side-effect matrix
+
+| Proposed read (separate M1 slices) | Source owner / current path | Current behavior / decision before exposure |
+| --- | --- | --- |
+| Project names/IDs | `projects.ts:38-43` `listProjects()` -> durable `projects` | Candidate passive read; **allowlist ID/name only**, never local roots/paths, remote host, ChatGPT links or security settings. Prove no writes/error-masking under a cold/invalid catalog before reuse. |
+| Cached chat list | `session/store.ts:3068-3117` `listSessionPage()`; `session/read-model.ts:40-80` | **Not yet pure**: the latter calls `listInputs()`, which can commit and publish history (`session/input.ts:1099-1114`). The store's catalog initializer can trigger metadata recovery. Introduce a *store-owned, already-ready memory peek* or return `not_ready`; never call the broad list from Web. |
+| Session detail | `session/read-model.ts:35-38` -> `getSession()` -> `store.ts:1045-1058` | **Not yet pure for cold sessions**: `readDurableSnapshot()` can write repaired `meta.json` (`store.ts:973-1035`). Propose a passive cached-detail owner read with explicit coverage, or a separately reviewed no-repair disk inspection. Never call `ensureOpen()` from Web. |
+| Timeline page | `session/read-model.ts:85-107` -> `readRecentEvents()/readEvents()` | **Not yet approved for Web**: cold owner reads can reconcile metadata; current event readers join pending session writes. Add bounded, store-owned no-repair view with `complete/partial/not_ready/needs_reconciliation` coverage. No empty-result inference when coverage is missing. |
+| Incremental chat events | `session/recorder.ts:176-190` `onSessionChange()`; `control-stream.ts:19-145` | Reuse the **pattern**, not the existing Control API endpoint: passive change notices plus a pure bounded event accessor, `seq` cursor and explicit gap/reset. Never call a read that can hydrate, repair or mutate when a stream reconnects. |
+| Minimal workers | `agents.ts:4813-4819` `swarmState()` | Candidate in-memory snapshot; project only safe counts and worker `id/role/state` if an operation truly needs them. Do **not** reuse `control-workers.ts:38-70` read routes, which call `measureSleepingWorkers()` and can offer broker messages. Exclude task, result, conversation IDs and reports. |
+| Model labels | `chat-models.ts:69-70` `getChatModels()` | **Not pure**: calls `expire()`, which can transition discovery state (`chat-models.ts:63-67`). Add an owner-side passive snapshot or defer the Web model read. Do not invoke discovery/refresh on GET. |
+| Minimal connection state | `connection.ts:206` `getStatus()` | Optional tiny in-process scalar projection if justified by the browser UX; no bridge/plugin tokens, URLs, public addresses, diagnostics or phone-notification feature work. |
+
+The matrix is an **investigation/implementation queue** rather than a
+claim that each source is already certified passive. M1 starts with **one
+small end-to-end query** (project ID/name is a candidate), followed by
+cached sessions, then timeline/streaming once their owner-side purity is
+proven. Workers/models/status can be deferred to focused PRs without
+blocking the initial read-only view. For every admitted read: exact owner,
+schema/field allowlist, authorization, cache coverage, bound, failure code,
+unit/integration tests and real-browser acceptance must be recorded.
+
+### 3. Loopback browser session (proposed, not yet implemented)
+
+1. **Off by default.** The trusted native main window invokes a named,
+   main-frame-checked IPC action. CoS main alone starts a numeric
+   `127.0.0.1` ephemeral listener and calls the OS browser with a
+   short-lived, cryptographically random, single-use activation ticket.
+   Neither the ticket nor a Control API bearer is returned to renderer JS.
+2. **Activation.** A same-host `GET /activate/{ticket}` atomically consumes
+   one unexpired ticket and establishes a new opaque server-side session.
+   Respond with a redirect to a randomized listener-scoped page, `no-store`
+   and `Referrer-Policy: no-referrer`. Never put tickets in logs, errors,
+   page HTML, client storage, or later URLs. Repeated opens must not
+   overwrite a ticket already handed to a browser before redemption;
+   bound/coalesce pending opens, expire and revoke tickets deterministically.
+3. **Cookie.** Only a random-name, scoped-path `HttpOnly; SameSite=Strict`
+   cookie carries the opaque browser session; short, bounded expiry, no
+   persistent browser-held API secret. `Secure` applies if a later
+   approved HTTPS transport is designed, **not** by pretending loopback
+   HTTP is HTTPS. Stop, shutdown or native revocation invalidates sessions
+   and terminates streams. Define reload/tab/session-rotation semantics
+   explicitly before implementing them.
+4. **Request fence.** Match `Host` exactly to the listener's
+   `127.0.0.1:<port>`; reject foreign `Origin` (if present), cross-site
+   Fetch Metadata, alternate hostnames, malformed target paths, GET bodies,
+   unknown routes/methods and CORS. Admit only authenticated same-origin
+   GETs and a deliberately bounded SSE route. Host/Origin/loopback **are
+   not user identity** and do not prove that another same-host process is
+   trusted; the ticket/cookie is still required.
+5. **Containment.** Static assets only from an explicit bundled allowlist;
+   restrictive CSP, `X-Content-Type-Options: nosniff`, `no-store`,
+   no framing or referrer leakage. Bound session count, pending tickets,
+   query pagination, total in-flight work **including owner promises that
+   outlive an HTTP deadline**, streams, buffered bytes and shutdown grace.
+   No unbounded polling or retry loop.
+
+**M1 responses:** `401` missing/expired session; `403` foreign browser
+context; `400/405` malformed route or method; `503 not_ready/busy` for
+unavailable coverage/admission; bounded timeout with no invented empty data.
+History/stream pages carry explicit `coverage`, `nextCursor` and
+`gap/reset` information; a reconnect must not silently skip rows. These
+names are **proposed semantics**, not finalized wire types. The existing
+Control API's four-stream and 1 MiB-buffer ceilings
+(`control-stream.ts:19-23`) are useful reviewed starting points, not
+permission to copy its endpoint/authentication into Web.
+
+### 4. Explicitly unavailable from M0/M1 browser
+
+No Send/new chat, Stop/Cancel, input/outbox reads that trigger recovery,
+worker spawn/message/ACK/reports, Goal/Loop changes, approvals/remote Allow,
+project/file/Git/terminal mutations, arbitrary filesystem or shell access,
+plugins/skills installation, settings writes, browser/Companion automation,
+generic IPC, privileged bridge or Control API tokens, raw app diagnostics,
+secrets or sensitive internal paths. A disabled UI control is not a backend
+permission boundary: **the HTTP routes must not exist**. The separate
+Telegram/phone notification work in #1934 is not an early Web requirement.
+Local read-only access also grants **no Tailscale/LAN/public access**.
+
+### 5. M0 review acceptance / first M1 PR boundary
+
+- Haz and the maintainer **approve the owner/query seam, narrowed read matrix,
+  bootstrap/session/Origin/Host semantics and exclusions before code**.
+- A first **new, current-`main`** M1 PR adds only one approved pure read and
+  its smallest browser presentation, with deterministic fail-first/purity,
+  malformed input, unauthorized access, readiness, shutdown and source-level
+  tests. Neither historical PoC PASS nor a mock-browser screenshot substitutes
+  for signed-in installed CoS/browser acceptance.
+- Later M1 streaming gets its own PR and tests for cursor gaps, multiple
+  clients, bounded buffers/reads, slow or disconnected clients, stale
+  sessions, cancellation and no file writes. No remote listener.
+- **Questions for design review:** Is project ID/name the correct first pure
+  M1 query? Should a cold incomplete session return `not_ready` or
+  `needs_reconciliation`? Should activation rotate the previous session or
+  support multiple tabs under one finite lease? What is the minimal redacted
+  timeline event allowlist? Each choice is made before its corresponding
+  implementation PR, not guessed from the stale prototype.
+
 ## Problem and desired outcome
 
 CoS is useful for long-running chat, tool and worker workflows, but the full
