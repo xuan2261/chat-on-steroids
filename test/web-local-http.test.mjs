@@ -40,7 +40,11 @@ test('one-time native activation protects a real owner read; dynamic names are H
   let reads = 0;
   const owner = await start(async () => {
     reads++;
-    return { connection: 'connected', projects: [{ name: '<script>untrusted</script>' }, { name: 'Alpha & Beta' }] };
+    return { connection: 'connected', projects: [
+      { name: '<script>untrusted</script>' },
+      { name: '<SCRIPT>uppercase</SCRIPT>' },
+      { name: 'Alpha & Beta' }
+    ] };
   });
   const path = owner.service.issueActivation();
   const locked = await fetch(owner.origin + '/');
@@ -58,8 +62,11 @@ test('one-time native activation protects a real owner read; dynamic names are H
   assert.match(response.headers.get('referrer-policy'), /no-referrer/);
   const body = await response.text();
   assert.match(body, /&lt;script&gt;untrusted&lt;\/script&gt;/);
+  assert.ok(body.includes('&lt;SCRIPT&gt;uppercase&lt;/SCRIPT&gt;'));
   assert.match(body, /Alpha &amp; Beta/);
-  assert.doesNotMatch(body, /<script>/);
+  // Verify both lowercase and uppercase tags cannot become HTML elements.
+  // String matching avoids a misleading case-sensitive HTML-filtering regexp.
+  assert.equal(body.toLowerCase().includes('<script'), false);
   assert.equal(reads, 1);
 });
 
