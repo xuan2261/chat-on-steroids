@@ -78,18 +78,31 @@ unit/integration tests and real-browser acceptance must be recorded.
    Neither the ticket nor a Control API bearer is returned to renderer JS.
 2. **Activation.** A same-host `GET /activate/{ticket}` atomically consumes
    one unexpired ticket and establishes a new opaque server-side session.
-   Respond with a redirect to a randomized listener-scoped page, `no-store`
-   and `Referrer-Policy: no-referrer`. Never put tickets in logs, errors,
-   page HTML, client storage, or later URLs. Repeated opens must not
-   overwrite a ticket already handed to a browser before redemption;
-   bound/coalesce pending opens, expire and revoke tickets deterministically.
-3. **Cookie.** Only a random-name, scoped-path `HttpOnly; SameSite=Strict`
-   cookie carries the opaque browser session; short, bounded expiry, no
-   persistent browser-held API secret. `Secure` applies if a later
-   approved HTTPS transport is designed, **not** by pretending loopback
-   HTTP is HTTPS. Stop, shutdown or native revocation invalidates sessions
-   and terminates streams. Define reload/tab/session-rotation semantics
-   explicitly before implementing them.
+   Create a **fresh, high-entropy per-listener path prefix**, such as
+   `/web/{random-scope}/` (at least 128 unpredictable bits), and redirect
+   only beneath that prefix with `no-store` and
+   `Referrer-Policy: no-referrer`. All served UI, static assets, authenticated
+   GET/API and SSE routes remain beneath this **same prefix**; no unscoped
+   alias or redirect may carry the session cookie. Never put tickets in
+   logs, errors, page HTML, client storage, or later URLs. Repeated opens
+   must not overwrite a ticket already handed to a browser before
+   redemption; bound/coalesce pending opens, expire and revoke tickets.
+3. **Cookie.** Use a unique random cookie name per listener and set its
+   explicit `Path=/web/{random-scope}/` to exactly the listener's path
+   prefix (including the trailing slash), with `HttpOnly; SameSite=Strict`
+   and a short, bounded lifetime. No `Domain` attribute or persistent
+   browser-held API secret. `Secure` applies if a later approved HTTPS
+   transport is designed, **not** by pretending loopback HTTP is HTTPS.
+   Stop, shutdown or native revocation invalidates sessions and streams;
+   define reload/tab/session-rotation behavior before implementation.
+   **Cookies are not isolated by port**, and `Path` does not protect a
+   known matching URL from another untrusted listener on the same host
+   (RFC 6265, sections 8.5–8.6). The random prefix limits unintended
+   cross-listener requests; it is **not** proof of local-process identity or
+   a complete security boundary. If a hostile/matching-path listener can
+   receive and replay the cookie, the design must use a separately reviewed
+   **listener-bound credential mechanism** that prevents replay, or fail
+   closed and not enable the Web session.
 4. **Request fence.** Match `Host` exactly to the listener's
    `127.0.0.1:<port>`; reject foreign `Origin` (if present), cross-site
    Fetch Metadata, alternate hostnames, malformed target paths, GET bodies,
@@ -130,6 +143,15 @@ Local read-only access also grants **no Tailscale/LAN/public access**.
 
 - Haz and the maintainer **approve the owner/query seam, narrowed read matrix,
   bootstrap/session/Origin/Host semantics and exclusions before code**.
+- **Two-listener browser test before M1:** start listeners A and B on distinct
+  ephemeral ports at `127.0.0.1`, each with its own random prefix and cookie
+  name. After activating A, requests to B's root and B's own scoped UI/API/SSE
+  paths must **not** carry A's session cookie. Also attempt B's deliberately
+  matching A-prefix path: because cookie port isolation does not exist, treat
+  any captured A credential as a **failed isolation test**, not a PASS.
+  Demonstrate that a listener-bound alternative rejects such replay, or
+  block activation until the cross-listener threat is resolved. Test host
+  rejection, prefix mismatch, cookie rotation/revocation and shutdown too.
 - A first **new, current-`main`** M1 PR adds only one approved pure read and
   its smallest browser presentation, with deterministic fail-first/purity,
   malformed input, unauthorized access, readiness, shutdown and source-level
